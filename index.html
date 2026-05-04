@@ -9,16 +9,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: oklch(0.97 0.012 85);
-    --surface: oklch(0.94 0.018 85);
-    --surface-2: oklch(0.92 0.022 85);
-    --line: oklch(0.86 0.02 85);
+    --bg: oklch(0.992 0.004 85);
+    --surface: oklch(0.965 0.010 85);
+    --surface-2: oklch(0.945 0.014 85);
+    --line: oklch(0.90 0.014 85);
     --ink: oklch(0.18 0.008 60);
     --ink-2: oklch(0.32 0.01 60);
     --muted: oklch(0.55 0.012 60);
     --accent: oklch(0.40 0.13 25);
-    --accent-soft: oklch(0.92 0.04 25);
-    --accent-line: oklch(0.85 0.06 25);
+    --accent-soft: oklch(0.95 0.03 25);
+    --accent-line: oklch(0.87 0.05 25);
     --serif: "Source Serif 4", Georgia, serif;
     --sans: "Inter", -apple-system, system-ui, sans-serif;
   }
@@ -36,7 +36,7 @@
   }
 
   button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
-  input  { font-family: inherit; color: inherit; }
+  input, select { font-family: inherit; color: inherit; }
 
   /* ── Page shell ── */
   .page {
@@ -72,18 +72,21 @@
     align-items: center;
     justify-content: center;
     transition: background 0.15s, color 0.15s, border-color 0.15s;
+    opacity: 0;
+    pointer-events: none;
   }
+  .pin-btn.visible { opacity: 1; pointer-events: auto; }
   .pin-btn.active {
     background: var(--ink);
     color: var(--bg);
     border-color: var(--ink);
   }
 
-  /* ── Salary input ── */
+  /* ── Input card ── */
   .input-card {
     background: var(--surface);
     border-radius: 16px;
-    padding: 18px 24px;
+    padding: 20px 24px 18px;
     border: 1px solid var(--line);
   }
 
@@ -93,23 +96,25 @@
     text-transform: uppercase;
     color: var(--muted);
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     display: block;
   }
 
   .input-row {
     display: flex;
-    align-items: baseline;
-    gap: 4px;
+    align-items: center;
+    gap: 0;
   }
 
-  .input-dollar {
+  .input-symbol {
     font-family: var(--serif);
     font-size: 44px;
     font-weight: 600;
     color: var(--ink-2);
     line-height: 1;
     user-select: none;
+    flex-shrink: 0;
+    margin-right: 4px;
   }
 
   .salary-input {
@@ -119,13 +124,83 @@
     background: transparent;
     border: none;
     outline: none;
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     color: var(--ink);
     padding: 0;
     letter-spacing: -1px;
     line-height: 1;
     font-feature-settings: "tnum" 1, "lnum" 1;
   }
+
+  /* ── Currency selector ── */
+  .currency-wrap {
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .currency-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 28px 6px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-2);
+    cursor: pointer;
+    outline: none;
+    letter-spacing: 0.3px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .currency-select:hover { border-color: var(--muted); }
+  .currency-select:focus { border-color: var(--ink-2); }
+
+  .currency-arrow {
+    position: absolute;
+    right: 9px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--muted);
+  }
+
+  /* ── Start button ── */
+  .start-row {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .start-btn {
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: 999px;
+    padding: 9px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .start-btn:hover { opacity: 0.85; }
+  .start-btn:disabled { opacity: 0.35; cursor: default; }
+
+  /* ── Results (hidden until started) ── */
+  .results {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    transition: opacity 0.3s;
+  }
+  .results.hidden { display: none; }
 
   /* ── Section ── */
   .section {
@@ -153,7 +228,7 @@
     background: var(--surface);
     border-radius: 14px;
     padding: 14px 18px;
-    border: 1px solid transparent;
+    border: 1px solid var(--line);
   }
 
   .card-label {
@@ -208,7 +283,7 @@
     background: var(--bg);
     border: 1px solid var(--line);
     border-radius: 14px;
-    box-shadow: 0 20px 50px -10px rgba(0,0,0,.18), 0 4px 12px rgba(0,0,0,.08);
+    box-shadow: 0 20px 50px -10px rgba(0,0,0,.15), 0 4px 12px rgba(0,0,0,.06);
     overflow: hidden;
     display: none;
   }
@@ -249,10 +324,7 @@
     padding: 0;
   }
 
-  /* ── Compact content (inside float) ── */
-  .compact-body {
-    padding: 14px 18px;
-  }
+  .compact-body { padding: 14px 18px; }
 
   .compact-label {
     font-size: 10px;
@@ -288,7 +360,7 @@
 <div class="page">
   <div class="shell">
 
-    <!-- Pin button -->
+    <!-- Pin button (appears after starting) -->
     <button class="pin-btn" id="pinBtn" title="Pin to desktop" aria-label="Pin to desktop">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <rect x="2.5" y="4" width="19" height="16" rx="2"/>
@@ -300,7 +372,7 @@
     <section class="input-card">
       <label class="field-label" for="salaryInput">Foregone annual salary</label>
       <div class="input-row">
-        <span class="input-dollar">$</span>
+        <span class="input-symbol" id="inputSymbol">$</span>
         <input
           id="salaryInput"
           class="salary-input"
@@ -310,30 +382,58 @@
           autocomplete="off"
           spellcheck="false"
         />
+        <div class="currency-wrap">
+          <select class="currency-select" id="currencySelect" aria-label="Currency">
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+            <option value="CHF">CHF</option>
+            <option value="JPY">JPY</option>
+            <option value="CAD">CAD</option>
+            <option value="AUD">AUD</option>
+            <option value="SEK">SEK</option>
+          </select>
+          <svg class="currency-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </div>
+      </div>
+      <div class="start-row">
+        <button class="start-btn" id="startBtn" disabled>
+          Start calculating
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
       </div>
     </section>
 
-    <!-- Cost breakdown -->
-    <section class="section">
-      <div class="section-head">Your cost of not working</div>
-      <div class="grid">
-        <div class="card"><div class="card-label">Per year</div><div class="card-val" id="cYear">$0</div></div>
-        <div class="card"><div class="card-label">Per month</div><div class="card-val" id="cMonth">$0</div></div>
-        <div class="card"><div class="card-label">Per week</div><div class="card-val" id="cWeek">$0</div></div>
-        <div class="card"><div class="card-label">Per day</div><div class="card-val" id="cDay">$0</div></div>
-        <div class="card"><div class="card-label">Per hour</div><div class="card-val" id="cHour">$0</div></div>
-        <div class="card"><div class="card-label">Per minute</div><div class="card-val" id="cMin">$0.00</div></div>
-      </div>
-    </section>
+    <!-- Results: hidden until Start is clicked -->
+    <div class="results hidden" id="results">
 
-    <!-- Live ticker -->
-    <section class="section">
-      <div class="section-head">Real-time cost ticker</div>
-      <div class="ticker">
-        <div class="ticker-label">Lost since you opened this</div>
-        <div class="ticker-num" id="tickerMain">$0.00</div>
-      </div>
-    </section>
+      <!-- Live ticker -->
+      <section class="section">
+        <div class="section-head">Real-time opportunity cost</div>
+        <div class="ticker">
+          <div class="ticker-label">Lost since you started this timer</div>
+          <div class="ticker-num" id="tickerMain">—</div>
+        </div>
+      </section>
+
+      <!-- Cost breakdown -->
+      <section class="section">
+        <div class="section-head">Breakdown</div>
+        <div class="grid">
+          <div class="card"><div class="card-label">Per year</div><div class="card-val" id="cYear">—</div></div>
+          <div class="card"><div class="card-label">Per month</div><div class="card-val" id="cMonth">—</div></div>
+          <div class="card"><div class="card-label">Per week</div><div class="card-val" id="cWeek">—</div></div>
+          <div class="card"><div class="card-label">Per day</div><div class="card-val" id="cDay">—</div></div>
+          <div class="card"><div class="card-label">Per hour</div><div class="card-val" id="cHour">—</div></div>
+          <div class="card"><div class="card-label">Per minute</div><div class="card-val" id="cMin">—</div></div>
+        </div>
+      </section>
+
+    </div>
 
   </div>
 </div>
@@ -349,60 +449,64 @@
     </button>
   </div>
   <div class="compact-body">
-    <div class="compact-label">Lost since opened</div>
-    <div class="compact-num" id="tickerFloat">$0.00</div>
+    <div class="compact-label">Lost since started</div>
+    <div class="compact-num" id="tickerFloat">—</div>
     <div class="compact-footer" id="floatFooter"></div>
   </div>
 </div>
 
 <script>
-  const STORAGE_KEY = 'opportunity-tracker-v1';
-  const TICK_KEY    = 'opportunity-tracker-opened-at-v1';
+  const STORAGE_KEY = 'opportunity-tracker-v2';
+
+  /* ── currencies ── */
+  const CURRENCIES = {
+    USD: '$', EUR: '€', GBP: '£', CHF: 'Fr',
+    JPY: '¥', CAD: 'C$', AUD: 'A$', SEK: 'kr',
+  };
 
   /* ── state ── */
-  let salary = 287500;
-  let derived = {};
+  let salary   = 0;
+  let currency = 'USD';
+  let started  = false;
+  let startedAt = null;
+  let derived  = {};
 
-  /* ── restore salary from localStorage ── */
+  /* ── restore from localStorage ── */
   try {
     const s = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-    if (s.salary && isFinite(s.salary)) salary = s.salary;
+    if (s.salary   && isFinite(s.salary))   salary   = s.salary;
+    if (s.currency && CURRENCIES[s.currency]) currency = s.currency;
   } catch (_) {}
-
-  /* ── ticker start time (persists for the session) ── */
-  const stored = sessionStorage.getItem(TICK_KEY);
-  const openedAt = stored ? parseInt(stored, 10) : (() => {
-    const t = Date.now();
-    sessionStorage.setItem(TICK_KEY, t);
-    return t;
-  })();
 
   /* ── math ── */
   function compute(annual) {
     const hrs = 40, weeks = 50, dayHrs = 8;
     const totalHrs = hrs * weeks;
-    const perHour   = totalHrs ? annual / totalHrs : 0;
-    const perMin    = perHour / 60;
-    const perSec    = perMin / 60;
-    const perDay    = perHour * dayHrs;
-    const perWeek   = perDay * 5;
-    const perMonth  = annual / 12;
+    const perHour  = totalHrs ? annual / totalHrs : 0;
+    const perMin   = perHour / 60;
+    const perSec   = perMin  / 60;
+    const perDay   = perHour * dayHrs;
+    const perWeek  = perDay  * 5;
+    const perMonth = annual  / 12;
     return { annual, perHour, perMin, perSec, perDay, perWeek, perMonth };
   }
 
   /* ── formatting ── */
+  function sym() { return CURRENCIES[currency] || '$'; }
+
   function fmt(n, dec = 0) {
-    if (!isFinite(n)) return '$0';
+    if (!isFinite(n)) return sym() + '0';
     const s = n.toFixed(dec);
     const [i, d] = s.split('.');
     const commas = i.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    return '$' + (d ? commas + '.' + d : commas);
+    return sym() + (d ? commas + '.' + d : commas);
   }
 
   function fmtCompact(n) {
-    if (n >= 1e6) return '$' + (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
-    if (n >= 1e3) return '$' + Math.round(n / 1e3) + 'k';
-    return '$' + Math.round(n);
+    const s = sym();
+    if (n >= 1e6) return s + (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 1e3) return s + Math.round(n / 1e3) + 'k';
+    return s + Math.round(n);
   }
 
   function parseSalary(str) {
@@ -413,22 +517,30 @@
   }
 
   /* ── DOM refs ── */
-  const salaryInput = document.getElementById('salaryInput');
-  const cYear  = document.getElementById('cYear');
-  const cMonth = document.getElementById('cMonth');
-  const cWeek  = document.getElementById('cWeek');
-  const cDay   = document.getElementById('cDay');
-  const cHour  = document.getElementById('cHour');
-  const cMin   = document.getElementById('cMin');
-  const tickerMain  = document.getElementById('tickerMain');
-  const pinBtn      = document.getElementById('pinBtn');
-  const floatWin    = document.getElementById('floatWin');
-  const floatBar    = document.getElementById('floatBar');
-  const floatClose  = document.getElementById('floatClose');
-  const tickerFloat = document.getElementById('tickerFloat');
-  const floatFooter = document.getElementById('floatFooter');
+  const salaryInput    = document.getElementById('salaryInput');
+  const inputSymbol    = document.getElementById('inputSymbol');
+  const currencySelect = document.getElementById('currencySelect');
+  const startBtn       = document.getElementById('startBtn');
+  const results        = document.getElementById('results');
+  const cYear          = document.getElementById('cYear');
+  const cMonth         = document.getElementById('cMonth');
+  const cWeek          = document.getElementById('cWeek');
+  const cDay           = document.getElementById('cDay');
+  const cHour          = document.getElementById('cHour');
+  const cMin           = document.getElementById('cMin');
+  const tickerMain     = document.getElementById('tickerMain');
+  const pinBtn         = document.getElementById('pinBtn');
+  const floatWin       = document.getElementById('floatWin');
+  const floatBar       = document.getElementById('floatBar');
+  const floatClose     = document.getElementById('floatClose');
+  const tickerFloat    = document.getElementById('tickerFloat');
+  const floatFooter    = document.getElementById('floatFooter');
 
-  /* ── update cards whenever salary changes ── */
+  /* ── init currency UI ── */
+  currencySelect.value = currency;
+  inputSymbol.textContent = sym();
+
+  /* ── update breakdown cards ── */
   function updateCards() {
     derived = compute(salary);
     cYear.textContent  = fmt(derived.annual);
@@ -438,7 +550,7 @@
     cHour.textContent  = fmt(derived.perHour);
     cMin.textContent   = fmt(derived.perMin, 2);
     updateCompactFooter();
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ salary })); } catch (_) {}
+    persist();
   }
 
   function updateCompactFooter() {
@@ -447,40 +559,64 @@
     if (pipFooterEl) pipFooterEl.textContent = text;
   }
 
+  function persist() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ salary, currency })); } catch (_) {}
+  }
+
   /* ── salary input ── */
+  if (salary > 0) {
+    salaryInput.value = salary.toLocaleString('en-US');
+    startBtn.disabled = false;
+  }
+
   salaryInput.addEventListener('focus', () => {
-    /* show raw digits for easy editing */
     salaryInput.value = salary > 0 ? String(salary) : '';
   });
 
   salaryInput.addEventListener('input', () => {
     const raw = salaryInput.value.replace(/,/g, '');
     if (!/^[\d.kKmM]*$/.test(raw)) return;
-    const n = parseSalary(raw);
-    if (n !== salary) {
-      salary = n;
-      updateCards();
-    }
+    salary = parseSalary(raw);
+    startBtn.disabled = salary <= 0;
+    if (started) updateCards();
   });
 
   salaryInput.addEventListener('blur', () => {
     salaryInput.value = salary > 0 ? salary.toLocaleString('en-US') : '';
   });
 
-  /* ── init ── */
-  salaryInput.value = salary > 0 ? salary.toLocaleString('en-US') : '';
-  updateCards();
+  /* ── currency select ── */
+  currencySelect.addEventListener('change', () => {
+    currency = currencySelect.value;
+    inputSymbol.textContent = sym();
+    if (started) updateCards();
+    persist();
+  });
+
+  /* ── start button ── */
+  startBtn.addEventListener('click', () => {
+    if (salary <= 0) return;
+    started   = true;
+    startedAt = Date.now();
+    updateCards();
+    results.classList.remove('hidden');
+    pinBtn.classList.add('visible');
+    startBtn.textContent = 'Restart';
+    startBtn.innerHTML = `Restart <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>`;
+  });
 
   /* ── RAF ticker loop ── */
-  let pipTickerEl  = null;
-  let pipFooterEl  = null;
+  let pipTickerEl = null;
+  let pipFooterEl = null;
 
   function tick() {
-    const lost = ((Date.now() - openedAt) / 1000) * derived.perSec;
-    const text = fmt(lost, 2);
-    tickerMain.textContent = text;
-    if (floatOpen)  tickerFloat.textContent = text;
-    if (pipTickerEl) pipTickerEl.textContent = text;
+    if (started && startedAt) {
+      const lost = ((Date.now() - startedAt) / 1000) * derived.perSec;
+      const text = fmt(lost, 2);
+      tickerMain.textContent = text;
+      if (floatOpen)   tickerFloat.textContent = text;
+      if (pipTickerEl) pipTickerEl.textContent = text;
+    }
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
@@ -496,73 +632,35 @@
     if (supportsDocPiP) {
       try {
         pipWin = await window.documentPictureInPicture.requestWindow({ width: 280, height: 140 });
-
-        /* copy fonts */
         document.querySelectorAll('link[rel="stylesheet"]').forEach(n =>
           pipWin.document.head.appendChild(n.cloneNode(true))
         );
-
-        /* inject styles for the compact view */
         const st = pipWin.document.createElement('style');
         st.textContent = `
           *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-          html, body {
-            background: oklch(0.97 0.012 85);
-            font-family: "Inter", system-ui, sans-serif;
-            -webkit-font-smoothing: antialiased;
-          }
-          .compact-body  { padding: 14px 18px; }
-          .compact-label {
-            font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase;
-            color: oklch(0.55 0.012 60); font-weight: 600; margin-bottom: 4px;
-          }
-          .compact-num {
-            font-family: "Source Serif 4", Georgia, serif;
-            font-size: 40px; font-weight: 600;
-            color: oklch(0.40 0.13 25);
-            letter-spacing: -0.5px; line-height: 1;
-            font-variant-numeric: tabular-nums;
-            font-feature-settings: "tnum" 1, "lnum" 1;
-            margin-bottom: 10px;
-          }
-          .compact-footer {
-            font-size: 11px; color: oklch(0.55 0.012 60);
-            padding-top: 10px; border-top: 1px solid oklch(0.86 0.02 85);
-          }
+          html, body { background: oklch(0.992 0.004 85); font-family: "Inter", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+          .compact-body { padding: 14px 18px; }
+          .compact-label { font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: oklch(0.55 0.012 60); font-weight: 600; margin-bottom: 4px; }
+          .compact-num { font-family: "Source Serif 4", Georgia, serif; font-size: 40px; font-weight: 600; color: oklch(0.40 0.13 25); letter-spacing: -0.5px; line-height: 1; font-variant-numeric: tabular-nums; margin-bottom: 10px; }
+          .compact-footer { font-size: 11px; color: oklch(0.55 0.012 60); padding-top: 10px; border-top: 1px solid oklch(0.90 0.014 85); }
         `;
         pipWin.document.head.appendChild(st);
-
         const body = pipWin.document.createElement('div');
         body.className = 'compact-body';
-        body.innerHTML = `
-          <div class="compact-label">Lost since opened</div>
-          <div class="compact-num" id="pt">$0.00</div>
-          <div class="compact-footer" id="pf"></div>
-        `;
+        body.innerHTML = `<div class="compact-label">Lost since started</div><div class="compact-num" id="pt">—</div><div class="compact-footer" id="pf"></div>`;
         pipWin.document.body.appendChild(body);
-
         pipTickerEl = pipWin.document.getElementById('pt');
         pipFooterEl = pipWin.document.getElementById('pf');
         updateCompactFooter();
-
         pipOpen = true;
         pinBtn.classList.add('active');
-
         pipWin.addEventListener('pagehide', () => {
-          pipOpen = false;
-          pipTickerEl = null;
-          pipFooterEl = null;
-          pipWin = null;
+          pipOpen = false; pipTickerEl = null; pipFooterEl = null; pipWin = null;
           pinBtn.classList.remove('active');
         });
-
         return;
-      } catch (_) {
-        /* fall through to floating window */
-      }
+      } catch (_) {}
     }
-
-    /* floating window fallback */
     floatOpen = true;
     floatWin.classList.add('open');
     floatWin.style.left = '24px';
@@ -572,8 +670,7 @@
 
   function closeCompact() {
     if (pipWin) { try { pipWin.close(); } catch (_) {} }
-    pipOpen   = false;
-    floatOpen = false;
+    pipOpen = false; floatOpen = false;
     floatWin.classList.remove('open');
     pinBtn.classList.remove('active');
   }
@@ -586,19 +683,14 @@
 
   /* ── draggable float window ── */
   floatBar.addEventListener('mousedown', (e) => {
-    const startX = e.clientX;
-    const startY = e.clientY;
+    const startX = e.clientX, startY = e.clientY;
     const ox = parseInt(floatWin.style.left, 10) || 24;
     const oy = parseInt(floatWin.style.top,  10) || 24;
-
     const onMove = (ev) => {
       floatWin.style.left = Math.max(8, Math.min(window.innerWidth  - 280, ox + ev.clientX - startX)) + 'px';
       floatWin.style.top  = Math.max(8, Math.min(window.innerHeight - 100, oy + ev.clientY - startY)) + 'px';
     };
-    const onUp = () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup',   onUp);
-    };
+    const onUp = () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup',   onUp);
   });
