@@ -71,6 +71,7 @@
     letter-spacing: -0.5px;
     color: var(--ink);
     margin-bottom: 14px;
+    white-space: nowrap;
   }
 
   .hero-hed em {
@@ -349,13 +350,17 @@
       min-height: 140px;
       margin-bottom: 4px;
     }
-    .hero-hed { font-size: 28px; }
+    .hero-hed {
+      font-size: 28px;
+      white-space: normal;
+    }
     .hero-blurb {
       font-size: 13px;
       min-height: 64px;
     }
     .ticker-num { font-size: 40px; }
     .salary-input, .input-symbol { font-size: 36px; }
+    .pin-btn { display: none !important; }
   }
 </style>
 </head>
@@ -374,8 +379,8 @@
 
     <!-- Hero -->
     <div class="hero">
-      <h1 class="hero-hed">Every minute you wait<br><em>costs money.</em></h1>
-      <p class="hero-blurb" id="heroBlurb">Time isn't free. See how much procrastination costs by adding your total comp below.</p>
+      <h1 class="hero-hed">Every minute you wait <em>costs money.</em></h1>
+      <p class="hero-blurb" id="heroBlurb">Working on it isn't the same as shipping it. Enter the salary you're walking away from and see what every hour of "almost done" actually costs.</p>
     </div>
 
     <!-- Input card -->
@@ -447,7 +452,7 @@
 <!-- Floating fallback window -->
 <div class="float-win" id="floatWin">
   <div class="float-bar" id="floatBar">
-    <span class="float-drag-hint">Drag</span>
+    <span class="float-drag-hint"></span>
     <button class="float-close-btn" id="floatClose" aria-label="Close">
       <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M18 6 6 18M6 6l12 12"/>
@@ -577,7 +582,7 @@
     results.classList.remove('hidden');
     startRow.classList.add('hidden');
     editBtn.classList.add('visible');
-    pinBtn.classList.add('visible');
+    pinBtn.classList.toggle('visible', !isMobileView());
     heroBlurb.textContent = 'An unfinished startup is the most expensive kind. You gave up a salary to build something. Every day you don’t ship, you’re paying for both: the income gone and the time burned.';
   });
 
@@ -610,8 +615,14 @@
   /* compact / PiP */
   let floatOpen = false, pipOpen = false, pipWin = null;
   const supportsDocPiP = 'documentPictureInPicture' in window;
+  const mobileQuery = window.matchMedia('(max-width: 640px)');
+
+  function isMobileView() {
+    return mobileQuery.matches;
+  }
 
   async function openCompact() {
+    if (isMobileView()) return;
     if (supportsDocPiP) {
       try {
         pipWin = await window.documentPictureInPicture.requestWindow({ width: 270, height: 130 });
@@ -642,7 +653,15 @@
     floatWin.classList.remove('open'); pinBtn.classList.remove('active');
   }
 
-  pinBtn.addEventListener('click', () => (pipOpen || floatOpen) ? closeCompact() : openCompact());
+  mobileQuery.addEventListener('change', (e) => {
+    if (e.matches) closeCompact();
+    pinBtn.classList.toggle('visible', started && !e.matches);
+  });
+
+  pinBtn.addEventListener('click', () => {
+    if (isMobileView()) return;
+    (pipOpen || floatOpen) ? closeCompact() : openCompact();
+  });
   floatClose.addEventListener('click', closeCompact);
 
   floatBar.addEventListener('mousedown', (e) => {
