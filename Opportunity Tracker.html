@@ -178,7 +178,7 @@
     transition: opacity 0.15s;
   }
   .start-btn:hover  { opacity: 0.82; }
-  .start-btn:disabled { opacity: 0.28; cursor: default; }
+  .start-btn.inactive { opacity: 0.28; cursor: default; pointer-events: none; }
 
   /* ── Results ── */
   .results {
@@ -392,7 +392,7 @@
       </div>
 
       <div class="start-row" id="startRow">
-        <button class="start-btn" id="startBtn" disabled>
+        <button class="start-btn inactive" id="startBtn">
           Start calculating
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -487,10 +487,7 @@
   }
 
   function parseSalary(str) {
-    const c = str.replace(/[^\d.kKmM]/g, '');
-    if (!c) return 0;
-    const m = /k$/i.test(c) ? 1e3 : /m$/i.test(c) ? 1e6 : 1;
-    return (parseFloat(m > 1 ? c.slice(0, -1) : c) || 0) * m;
+    return parseFloat(str.replace(/[^\d.]/g, '')) || 0;
   }
 
   const salaryInput     = document.getElementById('salaryInput');
@@ -534,7 +531,7 @@
 
   function syncButton() {
     salary = readInput();
-    startBtn.disabled = salary <= 0;
+    startBtn.classList.toggle('inactive', salary <= 0);
     if (started) updateCards();
   }
 
@@ -550,6 +547,7 @@
   }
 
   salaryInput.addEventListener(‘input’, syncButton);
+  salaryInput.addEventListener(‘keyup’, syncButton);
   salaryInput.addEventListener(‘paste’, () => setTimeout(syncButton, 0));
   salaryInput.addEventListener(‘keydown’, (e) => { if (e.key === ‘Enter’) doStart(); });
   salaryInput.addEventListener(‘blur’, () => {
