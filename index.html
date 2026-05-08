@@ -157,7 +157,28 @@
   .edit-btn:hover { background: var(--surface-2); color: var(--ink-2); }
 
   /* ── Start button ── */
-  #goBtn:hover { opacity: 0.82 !important; }
+  .start-row {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .start-row.hidden { display: none; }
+
+  .start-btn {
+    background: var(--ink);
+    color: var(--bg);
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.1px;
+    transition: opacity 0.15s;
+  }
+  .start-btn:hover  { opacity: 0.82; }
+  .start-btn:disabled { opacity: 0.28; cursor: default; }
 
   /* ── Results ── */
   .results {
@@ -343,7 +364,7 @@
     <!-- Hero -->
     <div class="hero">
       <h1 class="hero-hed">Every minute you wait<br><em>costs money.</em></h1>
-      <p class="hero-blurb">Time isn't free. See how much procrastination cost by adding your income below.</p>
+      <p class="hero-blurb" id="heroBlurb">Working on it isn't the same as shipping it. Enter the salary you're walking away from and see what every hour of "almost done" actually costs.</p>
     </div>
 
     <!-- Input card -->
@@ -367,14 +388,15 @@
           placeholder="100,000"
           autocomplete="off"
           spellcheck="false"
-          oninput="var b=document.getElementById('goBtn');b.style.opacity=this.value.trim()?'1':'0.28';b.style.pointerEvents=this.value.trim()?'auto':'none';"
         />
       </div>
 
-      <div id="startRow" style="margin-top:18px; display:flex; justify-content:flex-end;">
-        <button id="goBtn" style="opacity:0.28;pointer-events:none;background:var(--ink);color:var(--bg);border:none;border-radius:999px;padding:10px 28px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:opacity 0.15s;display:inline-flex;align-items:center;gap:6px;">
+      <div class="start-row" id="startRow">
+        <button class="start-btn" id="startBtn" disabled>
           Start calculating
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
         </button>
       </div>
     </section>
@@ -465,10 +487,15 @@
   }
 
   function parseSalary(str) {
-    return parseFloat(str.replace(/[^\d.]/g, '')) || 0;
+    const c = str.replace(/[^\d.kKmM]/g, '');
+    if (!c) return 0;
+    const m = /k$/i.test(c) ? 1e3 : /m$/i.test(c) ? 1e6 : 1;
+    return (parseFloat(m > 1 ? c.slice(0, -1) : c) || 0) * m;
   }
 
   const salaryInput     = document.getElementById('salaryInput');
+  const startRow        = document.getElementById('startRow');
+  const startBtn        = document.getElementById('startBtn');
   const editBtn         = document.getElementById('editBtn');
   const results         = document.getElementById('results');
   const accordionToggle = document.getElementById('accordionToggle');
@@ -487,6 +514,8 @@
   const tickerFloat = document.getElementById('tickerFloat');
   const floatFooter = document.getElementById('floatFooter');
 
+  if (salary > 0) { salaryInput.value = salary.toLocaleString('en-US'); startBtn.disabled = false; }
+
   function updateCards() {
     derived = compute(salary);
     cYear.textContent  = fmt(derived.annual);
@@ -501,38 +530,32 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ salary })); } catch (_) {}
   }
 
-  function doStart() {
-    var raw = salaryInput.value.replace(/[^\d.]/g, ‘’);
-    var val = parseFloat(raw) || 0;
-    if (val <= 0) { salaryInput.focus(); return; }
-    salary = val;
+  salaryInput.addEventListener('focus', () => { salaryInput.value = salary > 0 ? String(salary) : ''; });
+  salaryInput.addEventListener('input', () => {
+    const raw = salaryInput.value.replace(/,/g, '');
+    if (!/^[\d.kKmM]*$/.test(raw)) return;
+    salary = parseSalary(raw);
+    startBtn.disabled = salary <= 0;
+    if (started) updateCards();
+  });
+  salaryInput.addEventListener('blur', () => { salaryInput.value = salary > 0 ? salary.toLocaleString('en-US') : ''; });
+
+  const heroBlurb = document.getElementById('heroBlurb');
+
+  startBtn.addEventListener('click', () => {
+    if (salary <= 0) return;
     started = true; startedAt = Date.now();
     updateCards();
-    results.classList.remove(‘hidden’);
-    document.getElementById(‘startRow’).style.display = ‘none’;
-    editBtn.classList.add(‘visible’);
-    pinBtn.classList.add(‘visible’);
-  }
-
-  document.getElementById(‘goBtn’).addEventListener(‘click’, doStart);
-
-  salaryInput.addEventListener(‘keydown’, function(e) {
-    if (e.key === ‘Enter’) doStart();
-  });
-  salaryInput.addEventListener(‘blur’, function() {
-    var val = parseFloat(this.value.replace(/[^\d.]/g,’’)) || 0;
-    if (val > 0) { salary = val; this.value = val.toLocaleString(‘en-US’); }
+    results.classList.remove('hidden');
+    startRow.classList.add('hidden');
+    editBtn.classList.add('visible');
+    pinBtn.classList.add('visible');
+    heroBlurb.textContent = 'An unfinished startup is the most expensive kind. You gave up a salary to build something. Every day you don’t ship, you’re paying for both: the income gone and the time burned.';
   });
 
   editBtn.addEventListener('click', () => {
-    var startRow = document.getElementById('startRow');
-    startRow.style.display = '';
-    var goBtn = document.getElementById('goBtn');
-    var currentVal = parseFloat(salaryInput.value.replace(/[^\d.]/g,'')) || 0;
-    goBtn.style.opacity = currentVal > 0 ? '1' : '0.28';
-    goBtn.style.pointerEvents = currentVal > 0 ? 'auto' : 'none';
+    startRow.classList.remove('hidden');
     editBtn.classList.remove('visible');
-    results.classList.add('hidden');
     salaryInput.focus(); salaryInput.select();
   });
 
