@@ -528,25 +528,36 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ salary })); } catch (_) {}
   }
 
-  salaryInput.addEventListener('input', () => {
-    const raw = salaryInput.value.replace(/[,\s]/g, '');
-    salary = parseSalary(raw);
+  function readInput() {
+    return parseSalary(salaryInput.value.replace(/[,\s]/g, ‘’));
+  }
+
+  function syncButton() {
+    salary = readInput();
     startBtn.disabled = salary <= 0;
     if (started) updateCards();
-  });
-  salaryInput.addEventListener('blur', () => {
-    salaryInput.value = salary > 0 ? salary.toLocaleString('en-US') : '';
-  });
+  }
 
-  startBtn.addEventListener(‘click’, () => {
-    if (salary <= 0) return;
+  function doStart() {
+    salary = readInput();
+    if (salary <= 0) { salaryInput.focus(); return; }
     started = true; startedAt = Date.now();
     updateCards();
     results.classList.remove(‘hidden’);
     startRow.classList.add(‘hidden’);
     editBtn.classList.add(‘visible’);
     pinBtn.classList.add(‘visible’);
+  }
+
+  salaryInput.addEventListener(‘input’, syncButton);
+  salaryInput.addEventListener(‘paste’, () => setTimeout(syncButton, 0));
+  salaryInput.addEventListener(‘keydown’, (e) => { if (e.key === ‘Enter’) doStart(); });
+  salaryInput.addEventListener(‘blur’, () => {
+    salary = readInput();
+    salaryInput.value = salary > 0 ? salary.toLocaleString(‘en-US’) : ‘’;
   });
+
+  startBtn.addEventListener(‘click’, doStart);
 
   editBtn.addEventListener('click', () => {
     startRow.classList.remove('hidden');
