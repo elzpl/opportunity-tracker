@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Opportunity Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;1,8..60,300;1,8..60,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: oklch(0.993 0.003 85);
+    --surface: oklch(0.970 0.008 85);
+    --surface-2: oklch(0.950 0.012 85);
+    --line: oklch(0.918 0.010 85);
+    --ink: oklch(0.16 0.006 60);
+    --ink-2: oklch(0.38 0.010 60);
+    --muted: oklch(0.58 0.010 60);
+    --accent: oklch(0.40 0.13 25);
+    --accent-soft: oklch(0.963 0.022 25);
+    --accent-line: oklch(0.895 0.042 25);
+    --serif: "Source Serif 4", Georgia, serif;
+    --sans: "Inter", -apple-system, system-ui, sans-serif;
+    --radius-card: 20px;
+    --shadow-card: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.05);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input  { font-family: inherit; color: inherit; }
+
+  /* ── Page ── */
+  .page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px 48px;
+  }
+
+  .shell {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* ── Hero headline ── */
+  .hero {
+    text-align: center;
+    padding: 0 8px 4px;
+  }
+
+  .hero-hed {
+    font-family: var(--serif);
+    font-size: 38px;
+    font-weight: 300;
+    line-height: 1.18;
+    letter-spacing: -0.5px;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+
+  .hero-hed em {
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .hero-blurb {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--muted);
+    max-width: 420px;
+    margin: 0 auto;
+    font-weight: 400;
+  }
+
+  /* ── Input card ── */
+  .input-card {
+    background: var(--surface);
+    border-radius: var(--radius-card);
+    padding: 22px 26px 20px;
+    box-shadow: var(--shadow-card);
+    position: relative;
+  }
+
+  .field-label {
+    font-size: 11px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .input-row {
+    display: flex;
+    align-items: center;
+  }
+
+  .input-symbol {
+    font-family: var(--serif);
+    font-size: 46px;
+    font-weight: 400;
+    color: var(--ink-2);
+    line-height: 1;
+    user-select: none;
+    flex-shrink: 0;
+    margin-right: 3px;
+  }
+
+  .salary-input {
+    font-family: var(--serif);
+    font-size: 46px;
+    font-weight: 400;
+    background: transparent;
+    border: none;
+    outline: none;
+    flex: 1;
+    min-width: 0;
+    color: var(--ink);
+    padding: 0;
+    letter-spacing: -1.5px;
+    line-height: 1;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
+
+  /* ── Edit icon ── */
+  .edit-btn {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--muted);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+  }
+  .edit-btn.visible { display: flex; }
+  .edit-btn:hover { background: var(--surface-2); color: var(--ink-2); }
+
+  /* ── Start button ── */
+  .start-row {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .start-row.hidden { display: none; }
+
+  .start-btn {
+    background: var(--ink);
+    color: var(--bg);
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.1px;
+    transition: opacity 0.15s;
+  }
+  .start-btn:hover  { opacity: 0.82; }
+  .start-btn:disabled { opacity: 0.28; cursor: default; }
+
+  /* ── Results ── */
+  .results {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .results.hidden { display: none; }
+
+  /* ── Ticker ── */
+  .ticker-card {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-line);
+    border-radius: var(--radius-card);
+    padding: 24px 28px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .ticker-eyebrow {
+    font-size: 11px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    opacity: 0.7;
+    margin-bottom: 8px;
+  }
+
+  .ticker-num {
+    font-family: var(--serif);
+    font-size: 52px;
+    font-weight: 400;
+    color: var(--accent);
+    letter-spacing: -2px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
+
+  /* ── Accordion ── */
+  .accordion-section {
+    background: var(--surface);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+
+  .accordion-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.15s;
+    background: none;
+    border: none;
+  }
+  .accordion-toggle:hover { color: var(--ink-2); }
+
+  .accordion-caret {
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .accordion-toggle.open .accordion-caret { transform: rotate(180deg); }
+
+  /* ── Breakdown grid ── */
+  .grid {
+    display: none;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border-top: 1px solid var(--line);
+  }
+  .grid.open { display: grid; }
+
+  .card {
+    background: var(--surface);
+    padding: 14px 18px;
+  }
+
+  .card-label {
+    font-size: 11px;
+    letter-spacing: 0.3px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .card-val {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: -0.3px;
+    line-height: 1.05;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
+
+  /* ── Pin button ── */
+  .pin-btn {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    z-index: 50;
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+    color: var(--ink-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s, opacity 0.2s;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .pin-btn.visible { opacity: 1; pointer-events: auto; }
+  .pin-btn.active  { background: var(--ink); color: var(--bg); }
+
+  /* ── Floating window ── */
+  .float-win {
+    position: fixed;
+    left: 24px; top: 24px;
+    width: 270px;
+    z-index: 9999;
+    background: var(--bg);
+    border-radius: 18px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.14), 0 2px 8px rgba(0,0,0,.06);
+    overflow: hidden;
+    display: none;
+  }
+  .float-win.open { display: block; }
+
+  .float-bar {
+    height: 22px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 10px;
+    cursor: grab; user-select: none;
+  }
+  .float-bar:active { cursor: grabbing; }
+  .float-drag-hint { font-size: 10px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); }
+  .float-close-btn { width: 14px; height: 14px; border-radius: 50%; background: var(--surface-2); border: none; display: flex; align-items: center; justify-content: center; color: var(--muted); cursor: pointer; padding: 0; }
+  .compact-body { padding: 14px 16px; }
+  .compact-label { font-size: 10px; letter-spacing: 1.3px; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 4px; }
+  .compact-num { font-family: var(--serif); font-size: 38px; font-weight: 400; color: var(--accent); letter-spacing: -1px; line-height: 1; font-variant-numeric: tabular-nums; margin-bottom: 10px; }
+  .compact-footer { font-size: 11px; color: var(--muted); padding-top: 9px; border-top: 1px solid var(--line); }
+
+  /* ── Mobile ── */
+  @media (max-width: 640px) {
+    .page {
+      align-items: flex-start;
+      padding-top: 36px;
+    }
+    .hero-hed { font-size: 28px; }
+    .hero-blurb { font-size: 13px; }
+    .ticker-num { font-size: 40px; }
+    .salary-input, .input-symbol { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="shell">
+
+    <!-- Pin button -->
+    <button class="pin-btn" id="pinBtn" title="Pin to desktop" aria-label="Pin to desktop">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2.5" y="4" width="19" height="16" rx="2"/>
+        <rect x="12.5" y="12" width="7" height="6" rx="1" fill="currentColor" stroke="none"/>
+      </svg>
+    </button>
+
+    <!-- Hero -->
+    <div class="hero">
+      <h1 class="hero-hed">Every minute you wait<br><em>costs money.</em></h1>
+      <p class="hero-blurb">Enter the annual salary of the job offer on the table — or the one you turned down. The tracker runs in real time, showing you exactly what each day of not taking it is worth.</p>
+    </div>
+
+    <!-- Input card -->
+    <section class="input-card" id="inputCard">
+      <label class="field-label" for="salaryInput">Foregone annual salary</label>
+
+      <button class="edit-btn" id="editBtn" title="Edit salary" aria-label="Edit salary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      </button>
+
+      <div class="input-row">
+        <span class="input-symbol">$</span>
+        <input
+          id="salaryInput"
+          class="salary-input"
+          type="text"
+          inputmode="numeric"
+          placeholder="250,000"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+
+      <div class="start-row" id="startRow">
+        <button class="start-btn" id="startBtn" disabled>
+          Start calculating
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <div class="results hidden" id="results">
+
+      <!-- Ticker -->
+      <div class="ticker-card">
+        <div class="ticker-eyebrow">Lost since you started</div>
+        <div class="ticker-num" id="tickerMain">—</div>
+      </div>
+
+      <!-- Accordion breakdown -->
+      <div class="accordion-section">
+        <button class="accordion-toggle" id="accordionToggle" aria-expanded="false">
+          <span>Breakdown</span>
+          <svg class="accordion-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+        <div class="grid" id="breakdownGrid">
+          <div class="card"><div class="card-label">Per year</div><div class="card-val" id="cYear">—</div></div>
+          <div class="card"><div class="card-label">Per month</div><div class="card-val" id="cMonth">—</div></div>
+          <div class="card"><div class="card-label">Per week</div><div class="card-val" id="cWeek">—</div></div>
+          <div class="card"><div class="card-label">Per day</div><div class="card-val" id="cDay">—</div></div>
+          <div class="card"><div class="card-label">Per hour</div><div class="card-val" id="cHour">—</div></div>
+          <div class="card"><div class="card-label">Per minute</div><div class="card-val" id="cMin">—</div></div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- Floating fallback window -->
+<div class="float-win" id="floatWin">
+  <div class="float-bar" id="floatBar">
+    <span class="float-drag-hint">Drag</span>
+    <button class="float-close-btn" id="floatClose" aria-label="Close">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 6 6 18M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+  <div class="compact-body">
+    <div class="compact-label">Lost since started</div>
+    <div class="compact-num" id="tickerFloat">—</div>
+    <div class="compact-footer" id="floatFooter"></div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'opportunity-tracker-v3';
+
+  let salary    = 0;
+  let started   = false;
+  let startedAt = null;
+  let derived   = {};
+
+  try {
+    const s = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    if (s.salary && isFinite(s.salary)) salary = s.salary;
+  } catch (_) {}
+
+  function compute(annual) {
+    const totalHrs = 40 * 50;
+    const perHour  = totalHrs ? annual / totalHrs : 0;
+    const perMin   = perHour / 60;
+    const perSec   = perMin  / 60;
+    return { annual, perHour, perMin, perSec,
+             perDay: perHour * 8, perWeek: perHour * 8 * 5, perMonth: annual / 12 };
+  }
+
+  function fmt(n, dec = 0) {
+    if (!isFinite(n)) return '$0';
+    const s = n.toFixed(dec);
+    const [i, d] = s.split('.');
+    const c = i.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return '$' + (d ? c + '.' + d : c);
+  }
+
+  function fmtCompact(n) {
+    if (n >= 1e6) return '$' + (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 1e3) return '$' + Math.round(n / 1e3) + 'k';
+    return '$' + Math.round(n);
+  }
+
+  function parseSalary(str) {
+    const c = str.replace(/[^\d.kKmM]/g, '');
+    if (!c) return 0;
+    const m = /k$/i.test(c) ? 1e3 : /m$/i.test(c) ? 1e6 : 1;
+    return (parseFloat(m > 1 ? c.slice(0, -1) : c) || 0) * m;
+  }
+
+  const salaryInput     = document.getElementById('salaryInput');
+  const startRow        = document.getElementById('startRow');
+  const startBtn        = document.getElementById('startBtn');
+  const editBtn         = document.getElementById('editBtn');
+  const results         = document.getElementById('results');
+  const accordionToggle = document.getElementById('accordionToggle');
+  const breakdownGrid   = document.getElementById('breakdownGrid');
+  const cYear  = document.getElementById('cYear');
+  const cMonth = document.getElementById('cMonth');
+  const cWeek  = document.getElementById('cWeek');
+  const cDay   = document.getElementById('cDay');
+  const cHour  = document.getElementById('cHour');
+  const cMin   = document.getElementById('cMin');
+  const tickerMain  = document.getElementById('tickerMain');
+  const pinBtn      = document.getElementById('pinBtn');
+  const floatWin    = document.getElementById('floatWin');
+  const floatBar    = document.getElementById('floatBar');
+  const floatClose  = document.getElementById('floatClose');
+  const tickerFloat = document.getElementById('tickerFloat');
+  const floatFooter = document.getElementById('floatFooter');
+
+  if (salary > 0) { salaryInput.value = salary.toLocaleString('en-US'); startBtn.disabled = false; }
+
+  function updateCards() {
+    derived = compute(salary);
+    cYear.textContent  = fmt(derived.annual);
+    cMonth.textContent = fmt(derived.perMonth);
+    cWeek.textContent  = fmt(derived.perWeek);
+    cDay.textContent   = fmt(derived.perDay);
+    cHour.textContent  = fmt(derived.perHour);
+    cMin.textContent   = fmt(derived.perMin, 2);
+    const footer = `@ ${fmtCompact(derived.annual)}/yr · ${fmt(derived.perHour)}/hr`;
+    floatFooter.textContent = footer;
+    if (pipFooterEl) pipFooterEl.textContent = footer;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ salary })); } catch (_) {}
+  }
+
+  salaryInput.addEventListener('focus', () => { salaryInput.value = salary > 0 ? String(salary) : ''; });
+  salaryInput.addEventListener('input', () => {
+    const raw = salaryInput.value.replace(/,/g, '');
+    if (!/^[\d.kKmM]*$/.test(raw)) return;
+    salary = parseSalary(raw);
+    startBtn.disabled = salary <= 0;
+    if (started) updateCards();
+  });
+  salaryInput.addEventListener('blur', () => { salaryInput.value = salary > 0 ? salary.toLocaleString('en-US') : ''; });
+
+  startBtn.addEventListener('click', () => {
+    if (salary <= 0) return;
+    started = true; startedAt = Date.now();
+    updateCards();
+    results.classList.remove('hidden');
+    startRow.classList.add('hidden');
+    editBtn.classList.add('visible');
+    pinBtn.classList.add('visible');
+  });
+
+  editBtn.addEventListener('click', () => {
+    startRow.classList.remove('hidden');
+    editBtn.classList.remove('visible');
+    salaryInput.focus(); salaryInput.select();
+  });
+
+  /* accordion */
+  accordionToggle.addEventListener('click', () => {
+    const open = breakdownGrid.classList.toggle('open');
+    accordionToggle.classList.toggle('open', open);
+    accordionToggle.setAttribute('aria-expanded', open);
+  });
+
+  /* ticker */
+  let pipTickerEl = null, pipFooterEl = null;
+  function tick() {
+    if (started && startedAt) {
+      const text = fmt(((Date.now() - startedAt) / 1000) * derived.perSec, 2);
+      tickerMain.textContent = text;
+      if (floatOpen)   tickerFloat.textContent = text;
+      if (pipTickerEl) pipTickerEl.textContent = text;
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  /* compact / PiP */
+  let floatOpen = false, pipOpen = false, pipWin = null;
+  const supportsDocPiP = 'documentPictureInPicture' in window;
+
+  async function openCompact() {
+    if (supportsDocPiP) {
+      try {
+        pipWin = await window.documentPictureInPicture.requestWindow({ width: 270, height: 130 });
+        document.querySelectorAll('link[rel="stylesheet"]').forEach(n => pipWin.document.head.appendChild(n.cloneNode(true)));
+        const st = pipWin.document.createElement('style');
+        st.textContent = `*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html,body{background:oklch(0.993 0.003 85);font-family:"Inter",system-ui,sans-serif;-webkit-font-smoothing:antialiased}.compact-body{padding:14px 16px}.compact-label{font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:oklch(0.58 0.010 60);font-weight:500;margin-bottom:4px}.compact-num{font-family:"Source Serif 4",Georgia,serif;font-size:38px;font-weight:400;color:oklch(0.40 0.13 25);letter-spacing:-1px;line-height:1;font-variant-numeric:tabular-nums;margin-bottom:10px}.compact-footer{font-size:11px;color:oklch(0.58 0.010 60);padding-top:9px;border-top:1px solid oklch(0.918 0.010 85)}`;
+        pipWin.document.head.appendChild(st);
+        const body = pipWin.document.createElement('div');
+        body.className = 'compact-body';
+        body.innerHTML = `<div class="compact-label">Lost since started</div><div class="compact-num" id="pt">—</div><div class="compact-footer" id="pf"></div>`;
+        pipWin.document.body.appendChild(body);
+        pipTickerEl = pipWin.document.getElementById('pt');
+        pipFooterEl = pipWin.document.getElementById('pf');
+        floatFooter.textContent && (pipFooterEl.textContent = floatFooter.textContent);
+        pipOpen = true; pinBtn.classList.add('active');
+        pipWin.addEventListener('pagehide', () => { pipOpen = false; pipTickerEl = null; pipFooterEl = null; pipWin = null; pinBtn.classList.remove('active'); });
+        return;
+      } catch (_) {}
+    }
+    floatOpen = true; floatWin.classList.add('open');
+    floatWin.style.left = '24px'; floatWin.style.top = '24px';
+    pinBtn.classList.add('active');
+  }
+
+  function closeCompact() {
+    if (pipWin) { try { pipWin.close(); } catch (_) {} }
+    pipOpen = false; floatOpen = false;
+    floatWin.classList.remove('open'); pinBtn.classList.remove('active');
+  }
+
+  pinBtn.addEventListener('click', () => (pipOpen || floatOpen) ? closeCompact() : openCompact());
+  floatClose.addEventListener('click', closeCompact);
+
+  floatBar.addEventListener('mousedown', (e) => {
+    const sx = e.clientX, sy = e.clientY;
+    const ox = parseInt(floatWin.style.left, 10) || 24;
+    const oy = parseInt(floatWin.style.top,  10) || 24;
+    const onMove = (ev) => {
+      floatWin.style.left = Math.max(8, Math.min(window.innerWidth  - 270, ox + ev.clientX - sx)) + 'px';
+      floatWin.style.top  = Math.max(8, Math.min(window.innerHeight - 100, oy + ev.clientY - sy)) + 'px';
+    };
+    const onUp = () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+    window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp);
+  });
+</script>
+</body>
+</html>
