@@ -6,21 +6,23 @@
 <title>Opportunity Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,500;8..60,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: oklch(0.992 0.004 85);
-    --surface: oklch(0.965 0.010 85);
-    --surface-2: oklch(0.945 0.014 85);
-    --line: oklch(0.90 0.014 85);
-    --ink: oklch(0.18 0.008 60);
-    --ink-2: oklch(0.32 0.01 60);
-    --muted: oklch(0.55 0.012 60);
+    --bg: oklch(0.993 0.003 85);
+    --surface: oklch(0.970 0.008 85);
+    --surface-2: oklch(0.950 0.012 85);
+    --line: oklch(0.918 0.010 85);
+    --ink: oklch(0.16 0.006 60);
+    --ink-2: oklch(0.38 0.010 60);
+    --muted: oklch(0.58 0.010 60);
     --accent: oklch(0.40 0.13 25);
-    --accent-soft: oklch(0.95 0.03 25);
-    --accent-line: oklch(0.87 0.05 25);
+    --accent-soft: oklch(0.963 0.022 25);
+    --accent-line: oklch(0.895 0.042 25);
     --serif: "Source Serif 4", Georgia, serif;
     --sans: "Inter", -apple-system, system-ui, sans-serif;
+    --radius-card: 20px;
+    --shadow-card: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.05);
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,65 +40,40 @@
   button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
   input, select { font-family: inherit; color: inherit; }
 
-  /* ── Page shell ── */
+  /* ── Page ── */
   .page {
     height: 100vh;
     width: 100vw;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: 32px 24px;
   }
 
   .shell {
     width: 100%;
-    max-width: 720px;
+    max-width: 680px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
-  }
-
-  /* ── Pin button ── */
-  .pin-btn {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    width: 36px;
-    height: 36px;
-    z-index: 50;
-    border-radius: 999px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    color: var(--ink-2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .pin-btn.visible { opacity: 1; pointer-events: auto; }
-  .pin-btn.active {
-    background: var(--ink);
-    color: var(--bg);
-    border-color: var(--ink);
+    gap: 16px;
   }
 
   /* ── Input card ── */
   .input-card {
     background: var(--surface);
-    border-radius: 16px;
-    padding: 20px 24px 18px;
-    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    padding: 22px 26px 20px;
+    box-shadow: var(--shadow-card);
+    position: relative;
   }
 
   .field-label {
     font-size: 11px;
-    letter-spacing: 1.5px;
+    letter-spacing: 1.4px;
     text-transform: uppercase;
     color: var(--muted);
-    font-weight: 600;
-    margin-bottom: 14px;
+    font-weight: 500;
+    margin-bottom: 10px;
     display: block;
   }
 
@@ -108,19 +85,19 @@
 
   .input-symbol {
     font-family: var(--serif);
-    font-size: 44px;
-    font-weight: 600;
+    font-size: 46px;
+    font-weight: 400;
     color: var(--ink-2);
     line-height: 1;
     user-select: none;
     flex-shrink: 0;
-    margin-right: 4px;
+    margin-right: 3px;
   }
 
   .salary-input {
     font-family: var(--serif);
-    font-size: 44px;
-    font-weight: 600;
+    font-size: 46px;
+    font-weight: 400;
     background: transparent;
     border: none;
     outline: none;
@@ -128,7 +105,7 @@
     min-width: 0;
     color: var(--ink);
     padding: 0;
-    letter-spacing: -1px;
+    letter-spacing: -1.5px;
     line-height: 1;
     font-feature-settings: "tnum" 1, "lnum" 1;
   }
@@ -145,32 +122,49 @@
     appearance: none;
     -webkit-appearance: none;
     background: var(--surface-2);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 6px 28px 6px 10px;
-    font-size: 13px;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 26px 6px 10px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--ink-2);
     cursor: pointer;
     outline: none;
-    letter-spacing: 0.3px;
-    transition: border-color 0.15s, background 0.15s;
+    letter-spacing: 0.5px;
+    transition: background 0.15s;
   }
-  .currency-select:hover { border-color: var(--muted); }
-  .currency-select:focus { border-color: var(--ink-2); }
+  .currency-select:hover { background: var(--line); }
 
   .currency-arrow {
     position: absolute;
-    right: 9px;
+    right: 8px;
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
     color: var(--muted);
   }
 
+  /* ── Edit icon (top-right of input card) ── */
+  .edit-btn {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--muted);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+  }
+  .edit-btn.visible { display: flex; }
+  .edit-btn:hover { background: var(--surface-2); color: var(--ink-2); }
+
   /* ── Start button ── */
   .start-row {
-    margin-top: 16px;
+    margin-top: 14px;
     display: flex;
     justify-content: flex-end;
   }
@@ -180,110 +174,122 @@
     color: var(--bg);
     border: none;
     border-radius: 999px;
-    padding: 9px 20px;
+    padding: 8px 18px;
     font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.2px;
+    font-weight: 500;
     cursor: pointer;
     transition: opacity 0.15s;
     display: flex;
     align-items: center;
     gap: 6px;
+    letter-spacing: 0.1px;
   }
-  .start-btn:hover { opacity: 0.85; }
-  .start-btn:disabled { opacity: 0.35; cursor: default; }
+  .start-btn:hover { opacity: 0.82; }
+  .start-btn:disabled { opacity: 0.28; cursor: default; }
+  .start-row.hidden { display: none; }
 
-  /* ── Results (hidden until started) ── */
+  /* ── Results ── */
   .results {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    transition: opacity 0.3s;
-  }
-  .results.hidden { display: none; }
-
-  /* ── Section ── */
-  .section {
     display: flex;
     flex-direction: column;
     gap: 16px;
   }
+  .results.hidden { display: none; }
 
-  .section-head {
+  /* ── Ticker ── */
+  .ticker-card {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-line);
+    border-radius: var(--radius-card);
+    padding: 24px 28px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .ticker-eyebrow {
     font-size: 11px;
-    letter-spacing: 1.5px;
+    letter-spacing: 1.4px;
     text-transform: uppercase;
-    color: var(--ink-2);
-    font-weight: 600;
+    color: var(--accent);
+    font-weight: 500;
+    opacity: 0.75;
+    margin-bottom: 8px;
+  }
+
+  .ticker-num {
+    font-family: var(--serif);
+    font-size: 52px;
+    font-weight: 400;
+    color: var(--accent);
+    letter-spacing: -2px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
   }
 
   /* ── Breakdown grid ── */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
   }
 
   .card {
     background: var(--surface);
-    border-radius: 14px;
-    padding: 14px 18px;
-    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow-card);
   }
 
   .card-label {
-    font-size: 12px;
+    font-size: 11px;
+    letter-spacing: 0.3px;
     color: var(--muted);
-    margin-bottom: 6px;
+    margin-bottom: 8px;
+    font-weight: 500;
   }
 
   .card-val {
     font-family: var(--serif);
-    font-size: 26px;
-    font-weight: 600;
+    font-size: 24px;
+    font-weight: 400;
     color: var(--ink);
     letter-spacing: -0.5px;
     line-height: 1.05;
     font-feature-settings: "tnum" 1, "lnum" 1;
   }
 
-  /* ── Live ticker ── */
-  .ticker {
-    background: var(--accent-soft);
-    border: 1px solid var(--accent-line);
-    border-radius: 16px;
-    padding: 18px 24px;
+  /* ── Pin button ── */
+  .pin-btn {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    z-index: 50;
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+    color: var(--ink-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s, opacity 0.2s;
+    opacity: 0;
+    pointer-events: none;
   }
-
-  .ticker-label {
-    font-size: 13px;
-    color: var(--accent);
-    opacity: 0.8;
-    margin-bottom: 6px;
-  }
-
-  .ticker-num {
-    font-family: var(--serif);
-    font-size: 44px;
-    font-weight: 600;
-    color: var(--accent);
-    letter-spacing: -1px;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum" 1, "lnum" 1;
-  }
+  .pin-btn.visible { opacity: 1; pointer-events: auto; }
+  .pin-btn.active { background: var(--ink); color: var(--bg); }
 
   /* ── Floating window ── */
   .float-win {
     position: fixed;
     left: 24px;
     top: 24px;
-    width: 280px;
+    width: 270px;
     z-index: 9999;
     background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    box-shadow: 0 20px 50px -10px rgba(0,0,0,.15), 0 4px 12px rgba(0,0,0,.06);
+    border-radius: 18px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.14), 0 2px 8px rgba(0,0,0,.06);
     overflow: hidden;
     display: none;
   }
@@ -296,7 +302,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 8px;
+    padding: 0 10px;
     cursor: grab;
     user-select: none;
   }
@@ -311,47 +317,33 @@
   }
 
   .float-close-btn {
-    width: 16px;
-    height: 16px;
+    width: 14px; height: 14px;
     border-radius: 50%;
     background: var(--surface-2);
     border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     color: var(--muted);
-    cursor: pointer;
-    padding: 0;
+    cursor: pointer; padding: 0;
   }
 
-  .compact-body { padding: 14px 18px; }
+  .compact-body { padding: 14px 16px; }
 
   .compact-label {
-    font-size: 10px;
-    letter-spacing: 1.4px;
-    text-transform: uppercase;
-    color: var(--muted);
-    font-weight: 600;
-    margin-bottom: 4px;
+    font-size: 10px; letter-spacing: 1.3px; text-transform: uppercase;
+    color: var(--muted); font-weight: 500; margin-bottom: 4px;
   }
 
   .compact-num {
     font-family: var(--serif);
-    font-size: 40px;
-    font-weight: 600;
-    color: var(--accent);
-    letter-spacing: -0.5px;
-    line-height: 1;
+    font-size: 38px; font-weight: 400; color: var(--accent);
+    letter-spacing: -1px; line-height: 1;
     font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum" 1, "lnum" 1;
     margin-bottom: 10px;
   }
 
   .compact-footer {
-    font-size: 11px;
-    color: var(--muted);
-    padding-top: 10px;
-    border-top: 1px solid var(--line);
+    font-size: 11px; color: var(--muted);
+    padding-top: 9px; border-top: 1px solid var(--line);
   }
 </style>
 </head>
@@ -360,17 +352,26 @@
 <div class="page">
   <div class="shell">
 
-    <!-- Pin button (appears after starting) -->
+    <!-- Pin button -->
     <button class="pin-btn" id="pinBtn" title="Pin to desktop" aria-label="Pin to desktop">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <rect x="2.5" y="4" width="19" height="16" rx="2"/>
         <rect x="12.5" y="12" width="7" height="6" rx="1" fill="currentColor" stroke="none"/>
       </svg>
     </button>
 
-    <!-- Salary input -->
-    <section class="input-card">
+    <!-- Input card -->
+    <section class="input-card" id="inputCard">
       <label class="field-label" for="salaryInput">Foregone annual salary</label>
+
+      <!-- Edit icon — top right, shown after starting -->
+      <button class="edit-btn" id="editBtn" title="Edit salary" aria-label="Edit salary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      </button>
+
       <div class="input-row">
         <span class="input-symbol" id="inputSymbol">$</span>
         <input
@@ -393,45 +394,40 @@
             <option value="AUD">AUD</option>
             <option value="SEK">SEK</option>
           </select>
-          <svg class="currency-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="currency-arrow" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M6 9l6 6 6-6"/>
           </svg>
         </div>
       </div>
-      <div class="start-row">
+
+      <div class="start-row" id="startRow">
         <button class="start-btn" id="startBtn" disabled>
           Start calculating
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M5 12h14M12 5l7 7-7 7"/>
           </svg>
         </button>
       </div>
     </section>
 
-    <!-- Results: hidden until Start is clicked -->
+    <!-- Results — hidden until Start clicked -->
     <div class="results hidden" id="results">
 
-      <!-- Live ticker -->
-      <section class="section">
-        <div class="section-head">Real-time opportunity cost</div>
-        <div class="ticker">
-          <div class="ticker-label">Lost since you started this timer</div>
-          <div class="ticker-num" id="tickerMain">—</div>
-        </div>
-      </section>
+      <!-- Ticker -->
+      <div class="ticker-card">
+        <div class="ticker-eyebrow">Lost since you started</div>
+        <div class="ticker-num" id="tickerMain">—</div>
+      </div>
 
-      <!-- Cost breakdown -->
-      <section class="section">
-        <div class="section-head">Breakdown</div>
-        <div class="grid">
-          <div class="card"><div class="card-label">Per year</div><div class="card-val" id="cYear">—</div></div>
-          <div class="card"><div class="card-label">Per month</div><div class="card-val" id="cMonth">—</div></div>
-          <div class="card"><div class="card-label">Per week</div><div class="card-val" id="cWeek">—</div></div>
-          <div class="card"><div class="card-label">Per day</div><div class="card-val" id="cDay">—</div></div>
-          <div class="card"><div class="card-label">Per hour</div><div class="card-val" id="cHour">—</div></div>
-          <div class="card"><div class="card-label">Per minute</div><div class="card-val" id="cMin">—</div></div>
-        </div>
-      </section>
+      <!-- 3×2 breakdown -->
+      <div class="grid">
+        <div class="card"><div class="card-label">Per year</div><div class="card-val" id="cYear">—</div></div>
+        <div class="card"><div class="card-label">Per month</div><div class="card-val" id="cMonth">—</div></div>
+        <div class="card"><div class="card-label">Per week</div><div class="card-val" id="cWeek">—</div></div>
+        <div class="card"><div class="card-label">Per day</div><div class="card-val" id="cDay">—</div></div>
+        <div class="card"><div class="card-label">Per hour</div><div class="card-val" id="cHour">—</div></div>
+        <div class="card"><div class="card-label">Per minute</div><div class="card-val" id="cMin">—</div></div>
+      </div>
 
     </div>
 
@@ -443,7 +439,7 @@
   <div class="float-bar" id="floatBar">
     <span class="float-drag-hint">Drag</span>
     <button class="float-close-btn" id="floatClose" aria-label="Close">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M18 6 6 18M6 6l12 12"/>
       </svg>
     </button>
@@ -458,27 +454,23 @@
 <script>
   const STORAGE_KEY = 'opportunity-tracker-v2';
 
-  /* ── currencies ── */
   const CURRENCIES = {
     USD: '$', EUR: '€', GBP: '£', CHF: 'Fr',
     JPY: '¥', CAD: 'C$', AUD: 'A$', SEK: 'kr',
   };
 
-  /* ── state ── */
   let salary   = 0;
   let currency = 'USD';
   let started  = false;
   let startedAt = null;
   let derived  = {};
 
-  /* ── restore from localStorage ── */
   try {
     const s = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-    if (s.salary   && isFinite(s.salary))   salary   = s.salary;
+    if (s.salary   && isFinite(s.salary))    salary   = s.salary;
     if (s.currency && CURRENCIES[s.currency]) currency = s.currency;
   } catch (_) {}
 
-  /* ── math ── */
   function compute(annual) {
     const hrs = 40, weeks = 50, dayHrs = 8;
     const totalHrs = hrs * weeks;
@@ -491,7 +483,6 @@
     return { annual, perHour, perMin, perSec, perDay, perWeek, perMonth };
   }
 
-  /* ── formatting ── */
   function sym() { return CURRENCIES[currency] || '$'; }
 
   function fmt(n, dec = 0) {
@@ -520,27 +511,28 @@
   const salaryInput    = document.getElementById('salaryInput');
   const inputSymbol    = document.getElementById('inputSymbol');
   const currencySelect = document.getElementById('currencySelect');
+  const startRow       = document.getElementById('startRow');
   const startBtn       = document.getElementById('startBtn');
+  const editBtn        = document.getElementById('editBtn');
   const results        = document.getElementById('results');
-  const cYear          = document.getElementById('cYear');
-  const cMonth         = document.getElementById('cMonth');
-  const cWeek          = document.getElementById('cWeek');
-  const cDay           = document.getElementById('cDay');
-  const cHour          = document.getElementById('cHour');
-  const cMin           = document.getElementById('cMin');
-  const tickerMain     = document.getElementById('tickerMain');
-  const pinBtn         = document.getElementById('pinBtn');
-  const floatWin       = document.getElementById('floatWin');
-  const floatBar       = document.getElementById('floatBar');
-  const floatClose     = document.getElementById('floatClose');
-  const tickerFloat    = document.getElementById('tickerFloat');
-  const floatFooter    = document.getElementById('floatFooter');
+  const cYear  = document.getElementById('cYear');
+  const cMonth = document.getElementById('cMonth');
+  const cWeek  = document.getElementById('cWeek');
+  const cDay   = document.getElementById('cDay');
+  const cHour  = document.getElementById('cHour');
+  const cMin   = document.getElementById('cMin');
+  const tickerMain  = document.getElementById('tickerMain');
+  const pinBtn      = document.getElementById('pinBtn');
+  const floatWin    = document.getElementById('floatWin');
+  const floatBar    = document.getElementById('floatBar');
+  const floatClose  = document.getElementById('floatClose');
+  const tickerFloat = document.getElementById('tickerFloat');
+  const floatFooter = document.getElementById('floatFooter');
 
-  /* ── init currency UI ── */
   currencySelect.value = currency;
   inputSymbol.textContent = sym();
+  if (salary > 0) { salaryInput.value = salary.toLocaleString('en-US'); startBtn.disabled = false; }
 
-  /* ── update breakdown cards ── */
   function updateCards() {
     derived = compute(salary);
     cYear.textContent  = fmt(derived.annual);
@@ -550,7 +542,7 @@
     cHour.textContent  = fmt(derived.perHour);
     cMin.textContent   = fmt(derived.perMin, 2);
     updateCompactFooter();
-    persist();
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ salary, currency })); } catch (_) {}
   }
 
   function updateCompactFooter() {
@@ -559,20 +551,10 @@
     if (pipFooterEl) pipFooterEl.textContent = text;
   }
 
-  function persist() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ salary, currency })); } catch (_) {}
-  }
-
   /* ── salary input ── */
-  if (salary > 0) {
-    salaryInput.value = salary.toLocaleString('en-US');
-    startBtn.disabled = false;
-  }
-
   salaryInput.addEventListener('focus', () => {
     salaryInput.value = salary > 0 ? String(salary) : '';
   });
-
   salaryInput.addEventListener('input', () => {
     const raw = salaryInput.value.replace(/,/g, '');
     if (!/^[\d.kKmM]*$/.test(raw)) return;
@@ -580,32 +562,39 @@
     startBtn.disabled = salary <= 0;
     if (started) updateCards();
   });
-
   salaryInput.addEventListener('blur', () => {
     salaryInput.value = salary > 0 ? salary.toLocaleString('en-US') : '';
   });
 
-  /* ── currency select ── */
+  /* ── currency ── */
   currencySelect.addEventListener('change', () => {
     currency = currencySelect.value;
     inputSymbol.textContent = sym();
     if (started) updateCards();
-    persist();
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ salary, currency })); } catch (_) {}
   });
 
-  /* ── start button ── */
+  /* ── start ── */
   startBtn.addEventListener('click', () => {
     if (salary <= 0) return;
     started   = true;
     startedAt = Date.now();
     updateCards();
     results.classList.remove('hidden');
+    startRow.classList.add('hidden');
+    editBtn.classList.add('visible');
     pinBtn.classList.add('visible');
-    startBtn.textContent = 'Restart';
-    startBtn.innerHTML = `Restart <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>`;
   });
 
-  /* ── RAF ticker loop ── */
+  /* ── edit (goes back to editable state, keeps results visible) ── */
+  editBtn.addEventListener('click', () => {
+    startRow.classList.remove('hidden');
+    editBtn.classList.remove('visible');
+    salaryInput.focus();
+    salaryInput.select();
+  });
+
+  /* ── ticker RAF ── */
   let pipTickerEl = null;
   let pipFooterEl = null;
 
@@ -621,28 +610,25 @@
   }
   requestAnimationFrame(tick);
 
-  /* ── compact / PiP window ── */
-  let floatOpen = false;
-  let pipOpen   = false;
-  let pipWin    = null;
-
+  /* ── compact / PiP ── */
+  let floatOpen = false, pipOpen = false, pipWin = null;
   const supportsDocPiP = 'documentPictureInPicture' in window;
 
   async function openCompact() {
     if (supportsDocPiP) {
       try {
-        pipWin = await window.documentPictureInPicture.requestWindow({ width: 280, height: 140 });
+        pipWin = await window.documentPictureInPicture.requestWindow({ width: 270, height: 130 });
         document.querySelectorAll('link[rel="stylesheet"]').forEach(n =>
           pipWin.document.head.appendChild(n.cloneNode(true))
         );
         const st = pipWin.document.createElement('style');
         st.textContent = `
-          *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-          html, body { background: oklch(0.992 0.004 85); font-family: "Inter", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
-          .compact-body { padding: 14px 18px; }
-          .compact-label { font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: oklch(0.55 0.012 60); font-weight: 600; margin-bottom: 4px; }
-          .compact-num { font-family: "Source Serif 4", Georgia, serif; font-size: 40px; font-weight: 600; color: oklch(0.40 0.13 25); letter-spacing: -0.5px; line-height: 1; font-variant-numeric: tabular-nums; margin-bottom: 10px; }
-          .compact-footer { font-size: 11px; color: oklch(0.55 0.012 60); padding-top: 10px; border-top: 1px solid oklch(0.90 0.014 85); }
+          *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+          html,body{background:oklch(0.993 0.003 85);font-family:"Inter",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+          .compact-body{padding:14px 16px}
+          .compact-label{font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:oklch(0.58 0.010 60);font-weight:500;margin-bottom:4px}
+          .compact-num{font-family:"Source Serif 4",Georgia,serif;font-size:38px;font-weight:400;color:oklch(0.40 0.13 25);letter-spacing:-1px;line-height:1;font-variant-numeric:tabular-nums;margin-bottom:10px}
+          .compact-footer{font-size:11px;color:oklch(0.58 0.010 60);padding-top:9px;border-top:1px solid oklch(0.918 0.010 85)}
         `;
         pipWin.document.head.appendChild(st);
         const body = pipWin.document.createElement('div');
@@ -675,24 +661,20 @@
     pinBtn.classList.remove('active');
   }
 
-  pinBtn.addEventListener('click', () => {
-    (pipOpen || floatOpen) ? closeCompact() : openCompact();
-  });
-
+  pinBtn.addEventListener('click', () => (pipOpen || floatOpen) ? closeCompact() : openCompact());
   floatClose.addEventListener('click', closeCompact);
 
-  /* ── draggable float window ── */
   floatBar.addEventListener('mousedown', (e) => {
-    const startX = e.clientX, startY = e.clientY;
+    const sx = e.clientX, sy = e.clientY;
     const ox = parseInt(floatWin.style.left, 10) || 24;
     const oy = parseInt(floatWin.style.top,  10) || 24;
     const onMove = (ev) => {
-      floatWin.style.left = Math.max(8, Math.min(window.innerWidth  - 280, ox + ev.clientX - startX)) + 'px';
-      floatWin.style.top  = Math.max(8, Math.min(window.innerHeight - 100, oy + ev.clientY - startY)) + 'px';
+      floatWin.style.left = Math.max(8, Math.min(window.innerWidth  - 270, ox + ev.clientX - sx)) + 'px';
+      floatWin.style.top  = Math.max(8, Math.min(window.innerHeight - 100, oy + ev.clientY - sy)) + 'px';
     };
     const onUp = () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
     window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup',   onUp);
+    window.addEventListener('mouseup', onUp);
   });
 </script>
 </body>
