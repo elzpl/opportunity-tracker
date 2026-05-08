@@ -65,7 +65,7 @@
 
   .hero-hed {
     font-family: var(--serif);
-    font-size: 38px;
+    font-size: 44px;
     font-weight: 300;
     line-height: 1.18;
     letter-spacing: -0.5px;
@@ -351,7 +351,7 @@
       margin-bottom: 4px;
     }
     .hero-hed {
-      font-size: 28px;
+      font-size: 32px;
       white-space: normal;
     }
     .hero-blurb {
@@ -562,7 +562,10 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ salary })); } catch (_) {}
   }
 
-  salaryInput.addEventListener('focus', () => { salaryInput.value = salary > 0 ? String(salary) : ''; });
+  salaryInput.addEventListener('focus', () => {
+    salaryInput.value = salary > 0 ? String(salary) : '';
+    lockMobileScrollOnFocus();
+  });
   salaryInput.addEventListener('input', () => {
     const cursorFromEnd = salaryInput.value.length - salaryInput.selectionStart;
     const formatted = formatSalaryInput(salaryInput.value);
@@ -574,7 +577,10 @@
     startBtn.disabled = salary <= 0;
     if (started) updateCards();
   });
-  salaryInput.addEventListener('blur', () => { salaryInput.value = salary > 0 ? salary.toLocaleString('en-US') : ''; });
+  salaryInput.addEventListener('blur', () => {
+    salaryInput.value = salary > 0 ? salary.toLocaleString('en-US') : '';
+    mobileFocusScrollY = null;
+  });
 
   const heroBlurb = document.getElementById('heroBlurb');
 
@@ -618,9 +624,19 @@
   let floatOpen = false, pipOpen = false, pipWin = null;
   const supportsDocPiP = 'documentPictureInPicture' in window;
   const mobileQuery = window.matchMedia('(max-width: 640px)');
+  let mobileFocusScrollY = null;
 
   function isMobileView() {
     return mobileQuery.matches;
+  }
+
+  function lockMobileScrollOnFocus() {
+    if (!isMobileView()) return;
+    mobileFocusScrollY = window.scrollY;
+    requestAnimationFrame(() => window.scrollTo(0, mobileFocusScrollY));
+    setTimeout(() => {
+      if (mobileFocusScrollY !== null) window.scrollTo(0, mobileFocusScrollY);
+    }, 140);
   }
 
   async function openCompact() {
