@@ -340,9 +340,20 @@
     .page {
       align-items: flex-start;
       padding-top: 36px;
+      padding-bottom: 20px;
+    }
+    .shell {
+      gap: 16px;
+    }
+    .hero {
+      min-height: 140px;
+      margin-bottom: 4px;
     }
     .hero-hed { font-size: 28px; }
-    .hero-blurb { font-size: 13px; }
+    .hero-blurb {
+      font-size: 13px;
+      min-height: 64px;
+    }
     .ticker-num { font-size: 40px; }
     .salary-input, .input-symbol { font-size: 36px; }
   }
@@ -364,12 +375,12 @@
     <!-- Hero -->
     <div class="hero">
       <h1 class="hero-hed">Every minute you wait<br><em>costs money.</em></h1>
-      <p class="hero-blurb" id="heroBlurb">Working on it isn't the same as shipping it. Enter the salary you're walking away from and see what every hour of "almost done" actually costs.</p>
+      <p class="hero-blurb" id="heroBlurb">Time isn't free. See how much procrastination costs by adding your total comp below.</p>
     </div>
 
     <!-- Input card -->
     <section class="input-card" id="inputCard">
-      <label class="field-label" for="salaryInput">Foregone annual salary</label>
+      <label class="field-label" for="salaryInput">Your income</label>
 
       <button class="edit-btn" id="editBtn" title="Edit salary" aria-label="Edit salary">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -493,6 +504,19 @@
     return (parseFloat(m > 1 ? c.slice(0, -1) : c) || 0) * m;
   }
 
+  function formatSalaryInput(str) {
+    const clean = str.replace(/,/g, '').replace(/[^\d.kKmM]/g, '');
+    if (!clean) return '';
+    if (/[kKmM]$/.test(clean)) return clean;
+
+    const [intPartRaw, decPartRaw = ''] = clean.split('.');
+    const intPart = (intPartRaw || '').replace(/\D/g, '');
+    const decPart = decPartRaw.replace(/\D/g, '');
+    const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    if (clean.includes('.')) return `${grouped || '0'}.${decPart}`;
+    return grouped;
+  }
+
   const salaryInput     = document.getElementById('salaryInput');
   const startRow        = document.getElementById('startRow');
   const startBtn        = document.getElementById('startBtn');
@@ -532,9 +556,13 @@
 
   salaryInput.addEventListener('focus', () => { salaryInput.value = salary > 0 ? String(salary) : ''; });
   salaryInput.addEventListener('input', () => {
-    const raw = salaryInput.value.replace(/,/g, '');
-    if (!/^[\d.kKmM]*$/.test(raw)) return;
-    salary = parseSalary(raw);
+    const cursorFromEnd = salaryInput.value.length - salaryInput.selectionStart;
+    const formatted = formatSalaryInput(salaryInput.value);
+    salaryInput.value = formatted;
+    const nextCursor = Math.max(0, formatted.length - cursorFromEnd);
+    salaryInput.setSelectionRange(nextCursor, nextCursor);
+
+    salary = parseSalary(formatted);
     startBtn.disabled = salary <= 0;
     if (started) updateCards();
   });
