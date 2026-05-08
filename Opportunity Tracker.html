@@ -364,7 +364,7 @@
     <!-- Hero -->
     <div class="hero">
       <h1 class="hero-hed">Every minute you wait<br><em>costs money.</em></h1>
-      <p class="hero-blurb" id="heroBlurb">Working on it isn't the same as shipping it. Enter the salary you're walking away from and see what every hour of "almost done" actually costs.</p>
+      <p class="hero-blurb">Enter the salary you turned down to build your startup and check your opportunity cost in real time.</p>
     </div>
 
     <!-- Input card -->
@@ -453,7 +453,7 @@
 <script>
   const STORAGE_KEY = 'opportunity-tracker-v3';
 
-  let salary    = 0;
+  let salary    = 100000;
   let started   = false;
   let startedAt = null;
   let derived   = {};
@@ -540,17 +540,14 @@
   });
   salaryInput.addEventListener('blur', () => { salaryInput.value = salary > 0 ? salary.toLocaleString('en-US') : ''; });
 
-  const heroBlurb = document.getElementById('heroBlurb');
-
-  startBtn.addEventListener('click', () => {
+  startBtn.addEventListener(‘click’, () => {
     if (salary <= 0) return;
     started = true; startedAt = Date.now();
     updateCards();
-    results.classList.remove('hidden');
-    startRow.classList.add('hidden');
-    editBtn.classList.add('visible');
-    pinBtn.classList.add('visible');
-    heroBlurb.textContent = 'An unfinished startup is the most expensive kind. You gave up a salary to build something. Every day you don’t ship, you’re paying for both: the income gone and the time burned.';
+    results.classList.remove(‘hidden’);
+    startRow.classList.add(‘hidden’);
+    editBtn.classList.add(‘visible’);
+    pinBtn.classList.add(‘visible’);
   });
 
   editBtn.addEventListener('click', () => {
