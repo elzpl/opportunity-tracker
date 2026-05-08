@@ -178,7 +178,6 @@
     transition: opacity 0.15s;
   }
   .start-btn:hover  { opacity: 0.82; }
-  .start-btn:disabled { opacity: 0.28; cursor: default; }
 
   /* ── Results ── */
   .results {
@@ -392,7 +391,7 @@
       </div>
 
       <div class="start-row" id="startRow">
-        <button class="start-btn" id="startBtn" disabled>
+        <button class="start-btn" id="startBtn" style="opacity:0.28;pointer-events:none;cursor:default">
           Start calculating
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -487,10 +486,7 @@
   }
 
   function parseSalary(str) {
-    const c = str.replace(/[^\d.kKmM]/g, '');
-    if (!c) return 0;
-    const m = /k$/i.test(c) ? 1e3 : /m$/i.test(c) ? 1e6 : 1;
-    return (parseFloat(m > 1 ? c.slice(0, -1) : c) || 0) * m;
+    return parseFloat(str.replace(/[^\d.]/g, '')) || 0;
   }
 
   const salaryInput     = document.getElementById('salaryInput');
@@ -528,19 +524,26 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ salary })); } catch (_) {}
   }
 
-  function readInput() {
-    return parseSalary(salaryInput.value.replace(/[,\s]/g, ‘’));
+  function getInputVal() {
+    return parseFloat(salaryInput.value.replace(/[^\d.]/g, ‘’)) || 0;
   }
 
-  function syncButton() {
-    salary = readInput();
-    startBtn.disabled = salary <= 0;
-    if (started) updateCards();
+  function setButtonState(active) {
+    startBtn.style.opacity       = active ? ‘1’     : ‘0.28’;
+    startBtn.style.pointerEvents = active ? ‘auto’  : ‘none’;
+    startBtn.style.cursor        = active ? ‘pointer’ : ‘default’;
   }
+
+  // Poll the input every 150ms — catches every input method (typing, paste, autofill, IME)
+  setInterval(() => {
+    const val = getInputVal();
+    setButtonState(val > 0);
+  }, 150);
 
   function doStart() {
-    salary = readInput();
-    if (salary <= 0) { salaryInput.focus(); return; }
+    const val = getInputVal();
+    if (val <= 0) { salaryInput.focus(); return; }
+    salary = val;
     started = true; startedAt = Date.now();
     updateCards();
     results.classList.remove(‘hidden’);
@@ -549,13 +552,14 @@
     pinBtn.classList.add(‘visible’);
   }
 
-  salaryInput.addEventListener(‘input’, syncButton);
-  salaryInput.addEventListener(‘paste’, () => setTimeout(syncButton, 0));
-  salaryInput.addEventListener(‘keydown’, (e) => { if (e.key === ‘Enter’) doStart(); });
-  salaryInput.addEventListener(‘blur’, () => {
-    salary = readInput();
-    salaryInput.value = salary > 0 ? salary.toLocaleString(‘en-US’) : ‘’;
+  salaryInput.addEventListener(‘focus’, () => {
+    if (salary > 0) salaryInput.value = String(salary);
   });
+  salaryInput.addEventListener(‘blur’, () => {
+    const val = getInputVal();
+    if (val > 0) { salary = val; salaryInput.value = val.toLocaleString(‘en-US’); }
+  });
+  salaryInput.addEventListener(‘keydown’, (e) => { if (e.key === ‘Enter’) doStart(); });
 
   startBtn.addEventListener(‘click’, doStart);
 
