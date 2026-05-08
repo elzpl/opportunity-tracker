@@ -453,7 +453,7 @@
 <script>
   const STORAGE_KEY = 'opportunity-tracker-v3';
 
-  let salary    = 100000;
+  let salary    = 0;
   let started   = false;
   let startedAt = null;
   let derived   = {};
@@ -514,8 +514,6 @@
   const tickerFloat = document.getElementById('tickerFloat');
   const floatFooter = document.getElementById('floatFooter');
 
-  if (salary > 0) { salaryInput.value = salary.toLocaleString('en-US'); startBtn.disabled = false; }
-
   function updateCards() {
     derived = compute(salary);
     cYear.textContent  = fmt(derived.annual);
@@ -530,15 +528,15 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ salary })); } catch (_) {}
   }
 
-  salaryInput.addEventListener('focus', () => { salaryInput.value = salary > 0 ? String(salary) : ''; });
   salaryInput.addEventListener('input', () => {
-    const raw = salaryInput.value.replace(/,/g, '');
-    if (!/^[\d.kKmM]*$/.test(raw)) return;
+    const raw = salaryInput.value.replace(/[,\s]/g, '');
     salary = parseSalary(raw);
     startBtn.disabled = salary <= 0;
     if (started) updateCards();
   });
-  salaryInput.addEventListener('blur', () => { salaryInput.value = salary > 0 ? salary.toLocaleString('en-US') : ''; });
+  salaryInput.addEventListener('blur', () => {
+    salaryInput.value = salary > 0 ? salary.toLocaleString('en-US') : '';
+  });
 
   startBtn.addEventListener(‘click’, () => {
     if (salary <= 0) return;
