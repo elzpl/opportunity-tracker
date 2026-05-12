@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="light dark" />
 <title>Opportunity Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;1,8..60,300;1,8..60,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;1,8..60,300;1,8..60,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: oklch(0.993 0.003 85);
@@ -19,10 +20,36 @@
     --accent: oklch(0.40 0.13 25);
     --accent-soft: oklch(0.963 0.022 25);
     --accent-line: oklch(0.895 0.042 25);
+    --ticker-pad-x: 28px;
+    --breakdown-card: oklch(0.998 0.002 85);
+    --breakdown-border: oklch(0.952 0.008 85);
     --serif: "Source Serif 4", Georgia, serif;
     --sans: "Inter", -apple-system, system-ui, sans-serif;
+    --hand: "Kalam", "Segoe Print", "Bradley Hand", cursive;
     --radius-card: 20px;
     --shadow-card: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.05);
+    --float-w: 200px;
+    --float-h: 52px;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: oklch(0.17 0.012 280);
+      --surface: oklch(0.22 0.014 280);
+      --surface-2: oklch(0.27 0.014 280);
+      --line: oklch(0.34 0.012 280);
+      --ink: oklch(0.93 0.012 85);
+      --ink-2: oklch(0.78 0.012 85);
+      --muted: oklch(0.58 0.014 85);
+      --accent: oklch(0.72 0.14 25);
+      --accent-soft: oklch(0.24 0.04 25);
+      --accent-line: oklch(0.38 0.06 25);
+      --breakdown-card: oklch(0.20 0.012 280);
+      --breakdown-border: oklch(0.30 0.012 280);
+      --shadow-card: 0 1px 3px rgba(0,0,0,.35), 0 4px 24px rgba(0,0,0,.25);
+      color-scheme: dark;
+    }
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -194,7 +221,7 @@
     background: var(--accent-soft);
     border: 1px solid var(--accent-line);
     border-radius: var(--radius-card);
-    padding: 24px 28px;
+    padding: 24px var(--ticker-pad-x);
     box-shadow: var(--shadow-card);
   }
 
@@ -219,20 +246,20 @@
     font-feature-settings: "tnum" 1, "lnum" 1;
   }
 
-  /* ── Accordion ── */
-  .accordion-section {
-    background: var(--surface);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-card);
-    overflow: hidden;
+  /* ── Breakdown (inline toggle + grid; inset matches .ticker-card) ── */
+  .breakdown-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0 var(--ticker-pad-x);
   }
 
-  .accordion-toggle {
+  .breakdown-toggle {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 20px;
+    padding: 6px 0 14px;
     font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.8px;
@@ -242,27 +269,31 @@
     transition: color 0.15s;
     background: none;
     border: none;
+    text-align: left;
   }
-  .accordion-toggle:hover { color: var(--ink-2); }
+  .breakdown-toggle:hover { color: var(--ink-2); }
 
-  .accordion-caret {
+  .breakdown-caret {
     transition: transform 0.2s;
     flex-shrink: 0;
+    margin-left: 10px;
   }
-  .accordion-toggle.open .accordion-caret { transform: rotate(180deg); }
+  .breakdown-toggle.open .breakdown-caret { transform: rotate(180deg); }
 
   /* ── Breakdown grid ── */
   .grid {
     display: none;
     grid-template-columns: repeat(3, 1fr);
     gap: 1px;
-    background: var(--line);
-    border-top: 1px solid var(--line);
+    background: var(--breakdown-border);
+    border: 1px solid var(--breakdown-border);
+    border-radius: 12px;
+    overflow: hidden;
   }
   .grid.open { display: grid; }
 
   .card {
-    background: var(--surface);
+    background: var(--breakdown-card);
     padding: 14px 18px;
   }
 
@@ -306,35 +337,109 @@
   .pin-btn.visible { opacity: 1; pointer-events: auto; }
   .pin-btn.active  { background: var(--ink); color: var(--bg); }
 
-  /* ── Floating window ── */
+  /* ── Pin hint (plain text left of pop-out; no chrome) ── */
+  .pin-hint[hidden] {
+    display: none !important;
+  }
+  .pin-hint {
+    position: fixed;
+    top: 22px;
+    right: 52px;
+    z-index: 60;
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    max-width: min(200px, calc(100vw - 64px));
+    font-family: var(--hand);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1;
+    color: #000;
+    cursor: default;
+    user-select: none;
+    background: none;
+    border: none;
+    padding: 4px 0;
+    text-align: right;
+  }
+  @media (prefers-color-scheme: dark) {
+    .pin-hint { color: #f2f2f2; }
+  }
+  .pin-hint-text { white-space: nowrap; }
+  .pin-hint-arrow {
+    flex-shrink: 0;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    opacity: 0.95;
+  }
+
+  /* ── Floating window (fixed size, tracker only) ── */
   .float-win {
     position: fixed;
-    left: 24px; top: 24px;
-    width: 270px;
+    left: 24px;
+    top: 24px;
+    width: var(--float-w);
+    height: var(--float-h);
     z-index: 9999;
     background: var(--bg);
-    border-radius: 18px;
+    border-radius: 12px;
     box-shadow: 0 8px 40px rgba(0,0,0,.14), 0 2px 8px rgba(0,0,0,.06);
     overflow: hidden;
     display: none;
+    cursor: grab;
+    box-sizing: border-box;
+    user-select: none;
+  }
+  .float-win:active { cursor: grabbing; }
+  @media (prefers-color-scheme: dark) {
+    .float-win {
+      box-shadow: 0 8px 40px rgba(0,0,0,.55), 0 2px 12px rgba(0,0,0,.35);
+    }
   }
   .float-win.open { display: block; }
 
-  .float-bar {
+  .float-close-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 2;
+    width: 22px;
     height: 22px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--line);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 10px;
-    cursor: grab; user-select: none;
+    border-radius: 6px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0;
+    pointer-events: auto;
+    transition: background 0.12s, color 0.12s;
   }
-  .float-bar:active { cursor: grabbing; }
-  .float-drag-hint { font-size: 10px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); }
-  .float-close-btn { width: 14px; height: 14px; border-radius: 50%; background: var(--surface-2); border: none; display: flex; align-items: center; justify-content: center; color: var(--muted); cursor: pointer; padding: 0; }
-  .compact-body { padding: 14px 16px; }
-  .compact-label { font-size: 10px; letter-spacing: 1.3px; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 4px; }
-  .compact-num { font-family: var(--serif); font-size: 38px; font-weight: 400; color: var(--accent); letter-spacing: -1px; line-height: 1; font-variant-numeric: tabular-nums; margin-bottom: 10px; }
-  .compact-footer { font-size: 11px; color: var(--muted); padding-top: 9px; border-top: 1px solid var(--line); }
+  .float-close-btn:hover { background: var(--surface-2); color: var(--ink-2); }
+  .float-body {
+    height: 100%;
+    width: 100%;
+    padding: 0 28px 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+  .float-num {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 400;
+    color: var(--accent);
+    letter-spacing: -0.8px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
 
   /* ── Mobile ── */
   @media (max-width: 640px) {
@@ -380,10 +485,15 @@
       </svg>
     </button>
 
+    <div class="pin-hint" id="pinHint" role="status" aria-live="polite" hidden>
+      <span class="pin-hint-text">Keep on screen</span>
+      <span class="pin-hint-arrow" aria-hidden="true">-&gt;</span>
+    </div>
+
     <!-- Hero -->
     <div class="hero">
       <h1 class="hero-hed">Every minute you wait <em>costs money.</em></h1>
-      <p class="hero-blurb" id="heroBlurb">Time isn't free. See how much procrastination costs by adding your total comp below.</p>
+      <p class="hero-blurb" id="heroBlurb">Add the total comp you could be earning below and see how much your procrastination is costing you.</p>
     </div>
 
     <!-- Input card -->
@@ -412,7 +522,7 @@
 
       <div class="start-row" id="startRow">
         <button class="start-btn" id="startBtn" disabled>
-          Start calculating
+          Calculate
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M5 12h14M12 5l7 7-7 7"/>
           </svg>
@@ -425,15 +535,15 @@
 
       <!-- Ticker -->
       <div class="ticker-card">
-        <div class="ticker-eyebrow">Lost since you started</div>
+        <div class="ticker-eyebrow">What you could've made</div>
         <div class="ticker-num" id="tickerMain">—</div>
       </div>
 
-      <!-- Accordion breakdown -->
-      <div class="accordion-section">
-        <button class="accordion-toggle" id="accordionToggle" aria-expanded="false">
+      <!-- Breakdown -->
+      <div class="breakdown-block">
+        <button type="button" class="breakdown-toggle" id="breakdownToggle" aria-expanded="false">
           <span>Breakdown</span>
-          <svg class="accordion-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="breakdown-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M6 9l6 6 6-6"/>
           </svg>
         </button>
@@ -452,25 +562,23 @@
   </div>
 </div>
 
-<!-- Floating fallback window -->
+<!-- Floating fallback window (fixed size; drag to move) -->
 <div class="float-win" id="floatWin">
-  <div class="float-bar" id="floatBar">
-    <span class="float-drag-hint"></span>
-    <button class="float-close-btn" id="floatClose" aria-label="Close">
-      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M18 6 6 18M6 6l12 12"/>
-      </svg>
-    </button>
-  </div>
-  <div class="compact-body">
-    <div class="compact-label">Lost since started</div>
-    <div class="compact-num" id="tickerFloat">—</div>
-    <div class="compact-footer" id="floatFooter"></div>
+  <button type="button" class="float-close-btn" id="floatClose" aria-label="Close">
+    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 6 6 18M6 6l12 12"/>
+    </svg>
+  </button>
+  <div class="float-body">
+    <div class="float-num" id="tickerFloat">—</div>
   </div>
 </div>
 
 <script>
   const STORAGE_KEY = 'opportunity-tracker-v3';
+  const PIN_HINT_SESSION_KEY = 'ot-pin-hint-dismissed';
+  const FLOAT_W = 200;
+  const FLOAT_H = 52;
 
   let salary    = 0;
   let started   = false;
@@ -499,12 +607,6 @@
     return '$' + (d ? c + '.' + d : c);
   }
 
-  function fmtCompact(n) {
-    if (n >= 1e6) return '$' + (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
-    if (n >= 1e3) return '$' + Math.round(n / 1e3) + 'k';
-    return '$' + Math.round(n);
-  }
-
   function parseSalary(str) {
     const c = str.replace(/[^\d.kKmM]/g, '');
     if (!c) return 0;
@@ -530,7 +632,7 @@
   const startBtn        = document.getElementById('startBtn');
   const editBtn         = document.getElementById('editBtn');
   const results         = document.getElementById('results');
-  const accordionToggle = document.getElementById('accordionToggle');
+  const breakdownToggle = document.getElementById('breakdownToggle');
   const breakdownGrid   = document.getElementById('breakdownGrid');
   const cYear  = document.getElementById('cYear');
   const cMonth = document.getElementById('cMonth');
@@ -540,11 +642,48 @@
   const cMin   = document.getElementById('cMin');
   const tickerMain  = document.getElementById('tickerMain');
   const pinBtn      = document.getElementById('pinBtn');
+  const pinHint     = document.getElementById('pinHint');
   const floatWin    = document.getElementById('floatWin');
-  const floatBar    = document.getElementById('floatBar');
   const floatClose  = document.getElementById('floatClose');
   const tickerFloat = document.getElementById('tickerFloat');
-  const floatFooter = document.getElementById('floatFooter');
+
+  let pinHintRevealTimer = null;
+
+  function clearPinHintRevealTimer() {
+    if (pinHintRevealTimer) {
+      clearTimeout(pinHintRevealTimer);
+      pinHintRevealTimer = null;
+    }
+  }
+
+  function pinHintDelayElapsed() {
+    return !!(startedAt && Date.now() - startedAt >= 2000);
+  }
+
+  function schedulePinHintReveal() {
+    clearPinHintRevealTimer();
+    if (!pinHint) return;
+    pinHint.hidden = true;
+    if (!started || !startedAt || isMobileView() || sessionStorage.getItem(PIN_HINT_SESSION_KEY)) return;
+    const wait = Math.max(0, 2000 - (Date.now() - startedAt));
+    pinHintRevealTimer = setTimeout(() => {
+      pinHintRevealTimer = null;
+      syncPinHintVisibility();
+    }, wait);
+  }
+
+  function syncPinHintVisibility() {
+    if (!pinHint) return;
+    const dismissed = sessionStorage.getItem(PIN_HINT_SESSION_KEY);
+    const base = started && !isMobileView() && pinBtn.classList.contains('visible') && !dismissed;
+    pinHint.hidden = !(base && pinHintDelayElapsed());
+  }
+
+  function dismissPinHint() {
+    clearPinHintRevealTimer();
+    sessionStorage.setItem(PIN_HINT_SESSION_KEY, '1');
+    syncPinHintVisibility();
+  }
 
   if (salary > 0) { salaryInput.value = salary.toLocaleString('en-US'); startBtn.disabled = false; }
 
@@ -556,9 +695,6 @@
     cDay.textContent   = fmt(derived.perDay);
     cHour.textContent  = fmt(derived.perHour);
     cMin.textContent   = fmt(derived.perMin, 2);
-    const footer = `@ ${fmtCompact(derived.annual)}/yr · ${fmt(derived.perHour)}/hr`;
-    floatFooter.textContent = footer;
-    if (pipFooterEl) pipFooterEl.textContent = footer;
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ salary })); } catch (_) {}
   }
 
@@ -592,26 +728,28 @@
     startRow.classList.add('hidden');
     editBtn.classList.add('visible');
     pinBtn.classList.toggle('visible', !isMobileView());
+    schedulePinHintReveal();
   });
 
   editBtn.addEventListener('click', () => {
     startRow.classList.remove('hidden');
     editBtn.classList.remove('visible');
     salaryInput.focus(); salaryInput.select();
+    syncPinHintVisibility();
   });
 
-  /* accordion */
-  accordionToggle.addEventListener('click', () => {
+  /* breakdown expand/collapse */
+  breakdownToggle.addEventListener('click', () => {
     const open = breakdownGrid.classList.toggle('open');
-    accordionToggle.classList.toggle('open', open);
-    accordionToggle.setAttribute('aria-expanded', open);
+    breakdownToggle.classList.toggle('open', open);
+    breakdownToggle.setAttribute('aria-expanded', open);
   });
 
   /* ticker */
-  let pipTickerEl = null, pipFooterEl = null;
+  let pipTickerEl = null;
   function tick() {
     if (started && startedAt) {
-      const text = fmt(((Date.now() - startedAt) / 1000) * derived.perSec, 2);
+      const text = fmt(((Date.now() - startedAt) / 1000) * derived.perSec, 3);
       tickerMain.textContent = text;
       if (floatOpen)   tickerFloat.textContent = text;
       if (pipTickerEl) pipTickerEl.textContent = text;
@@ -639,30 +777,48 @@
     }, 140);
   }
 
+  function pipCompactCss(isDark) {
+    const shell =
+      '*{box-sizing:border-box;margin:0}' +
+      `html,body{width:${FLOAT_W}px;height:${FLOAT_H}px;overflow:hidden;font-family:"Inter",system-ui,sans-serif;-webkit-font-smoothing:antialiased;display:flex;align-items:center;justify-content:flex-end}` +
+      `#pt{font-family:"Source Serif 4",Georgia,serif;font-size:26px;font-weight:400;letter-spacing:-0.8px;line-height:1;font-variant-numeric:tabular-nums;padding:0 28px 0 8px;text-align:right;width:100%}`;
+    if (isDark) {
+      return shell + `html,body{background:oklch(0.17 0.012 280);color-scheme:dark}#pt{color:oklch(0.72 0.14 25)}`;
+    }
+    return shell + `html,body{background:oklch(0.993 0.003 85);color-scheme:light}#pt{color:oklch(0.40 0.13 25)}`;
+  }
+
   async function openCompact() {
     if (isMobileView()) return;
     if (supportsDocPiP) {
       try {
-        pipWin = await window.documentPictureInPicture.requestWindow({ width: 270, height: 130 });
+        const pipDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        pipWin = await window.documentPictureInPicture.requestWindow({
+          width: FLOAT_W,
+          height: FLOAT_H,
+        });
         document.querySelectorAll('link[rel="stylesheet"]').forEach(n => pipWin.document.head.appendChild(n.cloneNode(true)));
         const st = pipWin.document.createElement('style');
-        st.textContent = `*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html,body{background:oklch(0.993 0.003 85);font-family:"Inter",system-ui,sans-serif;-webkit-font-smoothing:antialiased}.compact-body{padding:14px 16px}.compact-label{font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:oklch(0.58 0.010 60);font-weight:500;margin-bottom:4px}.compact-num{font-family:"Source Serif 4",Georgia,serif;font-size:38px;font-weight:400;color:oklch(0.40 0.13 25);letter-spacing:-1px;line-height:1;font-variant-numeric:tabular-nums;margin-bottom:10px}.compact-footer{font-size:11px;color:oklch(0.58 0.010 60);padding-top:9px;border-top:1px solid oklch(0.918 0.010 85)}`;
+        st.textContent = pipCompactCss(pipDark);
         pipWin.document.head.appendChild(st);
-        const body = pipWin.document.createElement('div');
-        body.className = 'compact-body';
-        body.innerHTML = `<div class="compact-label">Lost since started</div><div class="compact-num" id="pt">—</div><div class="compact-footer" id="pf"></div>`;
-        pipWin.document.body.appendChild(body);
-        pipTickerEl = pipWin.document.getElementById('pt');
-        pipFooterEl = pipWin.document.getElementById('pf');
-        floatFooter.textContent && (pipFooterEl.textContent = floatFooter.textContent);
-        pipOpen = true; pinBtn.classList.add('active');
-        pipWin.addEventListener('pagehide', () => { pipOpen = false; pipTickerEl = null; pipFooterEl = null; pipWin = null; pinBtn.classList.remove('active'); });
+        const wrap = pipWin.document.createElement('div');
+        wrap.id = 'pt';
+        wrap.textContent = '—';
+        pipWin.document.body.appendChild(wrap);
+        pipTickerEl = wrap;
+        pipOpen = true;
+        pinBtn.classList.add('active');
+        dismissPinHint();
+        pipWin.addEventListener('pagehide', () => { pipOpen = false; pipTickerEl = null; pipWin = null; pinBtn.classList.remove('active'); });
         return;
       } catch (_) {}
     }
-    floatOpen = true; floatWin.classList.add('open');
-    floatWin.style.left = '24px'; floatWin.style.top = '24px';
+    floatOpen = true;
+    floatWin.classList.add('open');
+    floatWin.style.left = '24px';
+    floatWin.style.top = '24px';
     pinBtn.classList.add('active');
+    dismissPinHint();
   }
 
   function closeCompact() {
@@ -672,8 +828,16 @@
   }
 
   mobileQuery.addEventListener('change', (e) => {
-    if (e.matches) closeCompact();
+    if (e.matches) {
+      closeCompact();
+      clearPinHintRevealTimer();
+    }
     pinBtn.classList.toggle('visible', started && !e.matches);
+    if (!e.matches && started && !sessionStorage.getItem(PIN_HINT_SESSION_KEY)) {
+      schedulePinHintReveal();
+    } else {
+      syncPinHintVisibility();
+    }
   });
 
   pinBtn.addEventListener('click', () => {
@@ -682,17 +846,20 @@
   });
   floatClose.addEventListener('click', closeCompact);
 
-  floatBar.addEventListener('mousedown', (e) => {
+  floatWin.addEventListener('mousedown', (e) => {
+    if (e.target.closest('#floatClose')) return;
     const sx = e.clientX, sy = e.clientY;
     const ox = parseInt(floatWin.style.left, 10) || 24;
     const oy = parseInt(floatWin.style.top,  10) || 24;
     const onMove = (ev) => {
-      floatWin.style.left = Math.max(8, Math.min(window.innerWidth  - 270, ox + ev.clientX - sx)) + 'px';
-      floatWin.style.top  = Math.max(8, Math.min(window.innerHeight - 100, oy + ev.clientY - sy)) + 'px';
+      floatWin.style.left = Math.max(8, Math.min(window.innerWidth - FLOAT_W - 8, ox + ev.clientX - sx)) + 'px';
+      floatWin.style.top  = Math.max(8, Math.min(window.innerHeight - FLOAT_H - 8, oy + ev.clientY - sy)) + 'px';
     };
     const onUp = () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
     window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp);
   });
+
+  syncPinHintVisibility();
 </script>
 </body>
 </html>
